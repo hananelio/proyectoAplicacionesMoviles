@@ -75,7 +75,7 @@ export class FormLoginComponent  implements OnInit {
 
     try {
       await signInWithEmailAndPassword(this.auth, email, password);
-      await this.router.navigateByUrl('/home', { replaceUrl: true }); // o redirige a otra página si tienes
+      await this.router.navigateByUrl('/inicio', { replaceUrl: true }); // o redirige a otra página si tienes
     } catch (error: any) {
       this.loginError = this.getFirebaseErrorMessage(error.code);
     }

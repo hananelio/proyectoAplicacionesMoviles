@@ -1,0 +1,31 @@
+.custom-col {
+  width: 100%;
+}
+
+@media (min-width: 576px) {
+  .custom-col {
+    width: 50%;
+  }
+}
+
+@media (min-width: 768px) {
+  .custom-col {
+    width: 33.3333%;
+  }
+}
+
+@media (min-width: 992px) {
+  .custom-col {
+    width: 25%;
+  }
+}
+
+.dashboard-card {
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.dashboard-card:hover {
+  transform: scale(1.03);
+  background-color: aqua;
+}
