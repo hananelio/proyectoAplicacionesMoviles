@@ -1,0 +1,50 @@
+.login-content {
+  --background: linear-gradient(135deg, #00b4db, #0083b0);
+}
+
+.login-card {
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: rgba(236, 226, 198);
+  backdrop-filter: blur(8px);
+  padding: 20px;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  background: transparent;
+  margin-bottom: 20px;
+}
+
+.logo-img {
+  background: transparent;
+  //display: block;
+  //margin: 0 auto 16px;
+  width: 120px;
+  height: auto;
+  border-radius: 8px;
+}
+
+.error small {
+  color: var(--ion-color-danger-shade);
+  margin-left: 12px;
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+/* Opcional: ajustar alineación vertical si es necesario */
+ion-item {
+  display: flex;
+  align-items: center;
+
+  img.input-icon {
+    display: inline-block;
+  }
+}
+
+ion-icon {
+  font-size: 20px;
+  color: #0083b0; // azul moderno
+}

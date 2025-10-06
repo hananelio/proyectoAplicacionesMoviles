@@ -1,0 +1,58 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>home</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="login-content">
+  <ion-grid>
+    <ion-row class="ion-justify-content-center ion-align-items-center" style="height: 100vh;">
+      <ion-col size="12" size-md="8" size-lg="4">
+        <ion-card class="login-card">
+          <ion-card-content>
+
+            <div class="logo-container">
+              <img *ngIf="images['logo']" class="logo-img" alt="Logo AppEncuesta" [src]="images['logo']">
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+              <ion-item>
+                <ion-icon slot="start" name="mail-open-outline"></ion-icon>
+                <!--<ion-icon slot="start" class="fa-solid fa-envelope"></ion-icon>-->
+                <ion-input formControlName="email" type="email" autocomplete="email" placeholder="Correo Electrónico"></ion-input>
+              </ion-item>
+              <div class="error" *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.touched || loginForm.get('email')?.dirty)">
+                <!--<small *ngIf="loginForm.get('email')?.errors?.['required']">El correo es requerido.</small>
+                <small *ngIf="loginForm.get('email')?.errors?.['email']">Formato inválido.</small>-->
+                <small *ngIf="password?.errors?.['required']">La contraseña es requerida.</small>
+                <small *ngIf="password?.errors?.['minlength']">Mínimo 4 caracteres.</small>
+              </div>
+
+              <ion-item>
+                <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
+                <!--<ion-icon slot="start" class="fa-solid fa-lock"></ion-icon>-->
+                <ion-input formControlName="password" type="password" autocomplete="current-password" placeholder="Contraseña"></ion-input>
+              </ion-item>
+              <div class="error" *ngIf="loginForm.get('password')?.invalid && (loginForm.get('password')?.touched || loginForm.get('password')?.dirty)">
+                <small *ngIf="loginForm.get('password')?.errors?.['required']">La contraseña es requerida.</small>
+                <small *ngIf="loginForm.get('password')?.errors?.['minlength']">Mínimo 4 caracteres.</small>
+              </div>
+
+              <ion-button expand="block" type="submit" [disabled]="isSubmitting">
+                {{ isSubmitting ? 'Entrando...' : 'Entrar' }}
+                <!--<ng-container *ngIf="!isSubmitting">Entrar</ng-container>
+                <ng-container *ngIf="isSubmitting">Entrando...</ng-container>-->
+              </ion-button>
+
+              <ion-text color="danger" *ngIf="loginError">
+                <p class="ion-padding-start">{{ loginError }}</p>
+              </ion-text>
+            </form>
+
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+
