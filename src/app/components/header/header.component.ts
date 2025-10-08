@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { IonTitle, IonToolbar, IonButtons, IonMenuButton, IonButton, IonIcon } from "@ionic/angular/standalone";
+import {  } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { Images } from '../../services/images';
 import { HttpClientModule } from '@angular/common/http';
@@ -11,8 +11,7 @@ import { IonicModule } from '@ionic/angular';
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  imports: [IonButtons, IonToolbar,
-    IonMenuButton, IonTitle, CommonModule, IonicModule,
+  imports: [ CommonModule, IonicModule,
     HttpClientModule],
   standalone: true,
 })

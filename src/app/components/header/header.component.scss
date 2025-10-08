@@ -8,8 +8,8 @@ ion-header {
   align-items: center;
   justify-content: space-between;
   padding-inline: 8px;
-  color: #fff;
-  --color: #fff;
+  color: aqua /*#fff*/;
+  --color: aqua /*#fff*/;
 }
 
 .header-center {
@@ -25,7 +25,7 @@ ion-title {
   font-weight: 600;
   font-size: 1.2rem;
   letter-spacing: 0.5px;
-  color: #fff;
+  color: aqua/*#ffffff*/;
 }
 
 .logo {
@@ -50,4 +50,13 @@ ion-button {
 
 ion-icon {
   font-size: 1.4rem;
+  color: aqua;
 }
+/* header.component.scss */
+/*.logo {
+  height: 32px;
+  max-width: 120px;
+  vertical-align: middle;
+  object-fit: contain;
+
+}*/
