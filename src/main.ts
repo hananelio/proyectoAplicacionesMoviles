@@ -1,4 +1,5 @@
 //import { addIcons } from 'ionicons';
+import 'zone.js';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
 //import { mailOpenOutline, lockClosedOutline } from 'ionicons/icons';
 import { HttpClientModule } from '@angular/common/http';

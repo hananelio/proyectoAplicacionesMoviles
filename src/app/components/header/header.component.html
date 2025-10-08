@@ -1,9 +1,18 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
+  <ion-toolbar class="custom-toolbar">
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
+      <ion-menu-button color="light"></ion-menu-button>
     </ion-buttons>
-    <ion-title>{{ pageTitle }}</ion-title>
-    <img *ngIf="images['logo']" class="logo" alt="logo" [src]="images['logo']">
+
+    <div class="header-center">
+      <img *ngIf="images['logo']" class="logo" alt="logo" [src]="images['logo']">
+      <ion-title>{{ pageTitle }}</ion-title>
+    </div>
+
+    <ion-buttons slot="end">
+      <ion-button fill="clear" color="light">
+        <ion-icon slot="start" class="fa-solid fa-envelope"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>

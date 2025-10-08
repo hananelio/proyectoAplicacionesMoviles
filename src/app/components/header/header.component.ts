@@ -1,17 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { IonTitle, IonToolbar, IonHeader, IonButtons, IonMenuButton } from "@ionic/angular/standalone";
+import { IonTitle, IonToolbar, IonButtons, IonMenuButton, IonButton, IonIcon } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { Images } from '../../services/images';
 import { HttpClientModule } from '@angular/common/http';
 import { filter, map } from 'rxjs/operators';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { IonicModule } from '@ionic/angular';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  imports: [IonButtons, IonHeader, IonToolbar,
-    IonMenuButton, IonTitle, CommonModule,
+  imports: [IonButtons, IonToolbar,
+    IonMenuButton, IonTitle, CommonModule, IonicModule,
     HttpClientModule],
   standalone: true,
 })
