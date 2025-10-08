@@ -29,3 +29,11 @@
   transform: scale(1.03);
   background-color: aqua;
 }
+
+.fixed-navbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  z-index: 100;
+}
+

@@ -1,7 +1,7 @@
 
-import { addIcons } from 'ionicons';
+//import { addIcons } from 'ionicons';
 import { defineCustomElements } from '@ionic/pwa-elements/loader';
-import { mailOpenOutline, lockClosedOutline } from 'ionicons/icons';
+//import { mailOpenOutline, lockClosedOutline } from 'ionicons/icons';
 import { HttpClientModule } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
@@ -32,10 +32,10 @@ const firebaseConfig = {
 };
 
 // Registrar iconos manualmente
-addIcons({
+/*addIcons({
   'mail-open-outline': mailOpenOutline,
   'lock-closed-outline': lockClosedOutline
-});
+});*/
 
 // Inicializa los elementos PWA de Ionic
 defineCustomElements(window);

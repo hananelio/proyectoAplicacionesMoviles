@@ -4,7 +4,8 @@ import { CommonModule } from '@angular/common';
 import {  } from "@ionic/angular/standalone";
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
+import { Autentication } from 'src/app/services/autentication';
+//import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { Images } from '../../services/images';
 import { HttpClientModule } from '@angular/common/http';
 
@@ -26,7 +27,7 @@ export class FormLoginComponent  implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private auth: Auth,
+    private autentication: Autentication,
     private imagesService: Images//private http: HttpClient
   ) {
 
@@ -74,7 +75,8 @@ export class FormLoginComponent  implements OnInit {
     const { email, password } = this.loginForm.value;
 
     try {
-      await signInWithEmailAndPassword(this.auth, email, password);
+      await this.autentication.login(email, password);
+      //await signInWithEmailAndPassword(this.auth, email, password);
       await this.router.navigateByUrl('/inicio', { replaceUrl: true }); // o redirige a otra página si tienes
     } catch (error: any) {
       this.loginError = this.getFirebaseErrorMessage(error.code);
