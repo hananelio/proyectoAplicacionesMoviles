@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import {  } from "@ionic/angular/standalone";
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Autentication } from 'src/app/services/autentication';
+import { Authentication } from 'src/app/services/authentication';
 //import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { Images } from '../../services/images';
 import { HttpClientModule } from '@angular/common/http';
@@ -27,7 +27,7 @@ export class FormLoginComponent  implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private autentication: Autentication,
+    private authentication: Authentication,
     private imagesService: Images//private http: HttpClient
   ) {
 
@@ -55,8 +55,14 @@ export class FormLoginComponent  implements OnInit {
 
   async loadImages() {
     try {
-      this.images = await this.imagesService.loadImages();
-      console.log('Images cargadas:', this.images);
+      // Cargar imágenes (cacheadas si ya existen)
+      this.images = this.imagesService.getImages() || await this.imagesService.loadImages();
+      //this.images = await this.imagesService.loadImages();
+      
+      Object.keys(this.images).forEach(key => {
+        console.log(`Imagen cargada: ${key}`);
+      });
+      //console.log('Images cargadas:'/*, this.images*/);
     } catch (err) {
       console.error('Error cargando images.json', err);
       this.images = {};
@@ -75,7 +81,7 @@ export class FormLoginComponent  implements OnInit {
     const { email, password } = this.loginForm.value;
 
     try {
-      await this.autentication.login(email, password);
+      await this.authentication.login(email, password);
       //await signInWithEmailAndPassword(this.auth, email, password);
       await this.router.navigateByUrl('/inicio', { replaceUrl: true }); // o redirige a otra página si tienes
     } catch (error: any) {

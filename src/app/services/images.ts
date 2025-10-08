@@ -11,6 +11,7 @@ export class Images {
   constructor(private http: HttpClient) { }
 
   async loadImages(): Promise<any> {
+    
     if (this.images) {
       return this.images;
     }

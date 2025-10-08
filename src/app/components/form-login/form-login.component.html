@@ -11,8 +11,8 @@
   <div class="error" *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.touched || loginForm.get('email')?.dirty)">
     <!--<small *ngIf="loginForm.get('email')?.errors?.['required']">El correo es requerido.</small>
     <small *ngIf="loginForm.get('email')?.errors?.['email']">Formato inválido.</small>-->
-    <small *ngIf="password?.errors?.['required']">La contraseña es requerida.</small>
-    <small *ngIf="password?.errors?.['minlength']">Mínimo 4 caracteres.</small>
+    <small *ngIf="password?.errors?.['required']">El correo es requerido.</small>
+    <small *ngIf="password?.errors?.['minlength']">Formato inválido.</small>
   </div>
 
   <ion-item>

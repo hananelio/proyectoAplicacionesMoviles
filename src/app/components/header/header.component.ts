@@ -25,8 +25,12 @@ export class HeaderComponent  implements OnInit {
 
   async loadImages() {
     try {
-      this.images = await this.imagesService.loadImages();
-      console.log('Images cargadas:', this.images);
+      this.images = this.imagesService.getImages() || await this.imagesService.loadImages();
+      
+      Object.keys(this.images).forEach(key => {
+        console.log(`Imagen cargada: ${key}`);
+      });
+      
     } catch (err) {
       console.error('Error cargando images.json', err);
       this.images = {};
