@@ -16,7 +16,7 @@ import { Router, NavigationEnd } from '@angular/router';
     HttpClientModule],
   standalone: true,
 })
-/*export class HeaderComponent  implements OnInit {
+export class HeaderComponent  implements OnInit {
   pageTitle: string = '';
   images: Record<string, any> = {};
 
@@ -61,8 +61,8 @@ import { Router, NavigationEnd } from '@angular/router';
         this.pageTitle = '';
     }
   }
-}*/
-export class HeaderComponent  implements OnInit {
+}
+/*export class HeaderComponent  implements OnInit {
   pageTitle: string = '';
   images: Record<string, any> = {};
 
@@ -104,5 +104,5 @@ export class HeaderComponent  implements OnInit {
         this.pageTitle = '';
     }
   }
-}
+}*/
 
