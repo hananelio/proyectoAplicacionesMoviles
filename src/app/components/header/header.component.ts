@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {  } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
-import { Images } from '../../services/images';
+import { Images } from '../../services/core/images';
 import { HttpClientModule } from '@angular/common/http';
 import { filter, map } from 'rxjs/operators';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';

@@ -4,9 +4,9 @@ import { CommonModule } from '@angular/common';
 import {  } from "@ionic/angular/standalone";
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Authentication } from 'src/app/services/authentication';
+import { Authentication } from 'src/app/services/core/authentication';
 //import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
-import { Images } from '../../services/images';
+import { Images } from '../../services/core/images';
 import { HttpClientModule } from '@angular/common/http';
 
 @Component({
