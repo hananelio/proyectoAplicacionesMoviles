@@ -1,5 +1,5 @@
-import { Pregunta } from './pregunta';
-import { Asignacion } from './asignacion';
+import { Pregunta } from './pregunta.model';
+import { Asignacion } from './asignacion.model';
 
 export interface Respuesta {
     id?: string;

@@ -1,4 +1,4 @@
-import { CondicionSalto } from './condicion-salto';
+import { CondicionSalto } from './condicion-salto.model';
 
 export interface SaltoPregunta {
   condicion: CondicionSalto;   // la condición que debe cumplirse

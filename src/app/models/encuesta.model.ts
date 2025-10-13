@@ -1,6 +1,6 @@
-import { Asignacion } from './asignacion';
+import { Asignacion } from './asignacion.model';
 import { Timestamp } from 'firebase/firestore';
-import { Seccion } from './seccion';
+import { Seccion } from './seccion.model';
 
 export interface Encuesta {
     id: string; // Identificador único de la encuesta

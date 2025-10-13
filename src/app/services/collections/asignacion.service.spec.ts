@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { CondicionSalto } from './condicion-salto';
+import { AsignaciónService } from './asignación.service';
 
-describe('CondicionSalto', () => {
-  let service: CondicionSalto;
+describe('AsignaciónService', () => {
+  let service: AsignaciónService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(CondicionSalto);
+    service = TestBed.inject(AsignaciónService);
   });
 
   it('should be created', () => {
