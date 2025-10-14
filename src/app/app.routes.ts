@@ -1,12 +1,12 @@
 import { Routes } from '@angular/router';
-import { HomePage } from './home/home.page'; // ajusta la ruta si es necesario
+import { HomePage } from './pages/home/home.page'; // ajusta la ruta si es necesario
 
 
 export const routes: Routes = [
   {
     path: 'home',
     loadComponent: () =>
-      import('./home/home.page').then((m) => m.HomePage),
+      import('./pages/home/home.page').then((m) => m.HomePage),
     data: { title: 'Home' }
   },
   {
