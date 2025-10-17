@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { HeaderComponent } from 'src/app/components/header/header.component';
+import { HeaderComponent } from '../header/header.component';
 import { NavbarComponent } from 'src/app/components/navbar/navbar.component';
 
 @Component({
