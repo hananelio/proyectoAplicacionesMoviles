@@ -22,7 +22,7 @@ import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideMessaging, getMessaging } from '@angular/fire/messaging';
 import { provideStorage, getStorage } from '@angular/fire/storage';
 
-const firebaseConfig = {
+const firebase = {
   projectId: 'appencuestabd',
   appId: '1:765801133121:web:7ff2d7ddee72e87b8e82c0',
   storageBucket: 'appencuestabd.appspot.com',
@@ -46,7 +46,7 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(HttpClientModule),
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideFirebaseApp(() => initializeApp(firebaseConfig)),
+    provideFirebaseApp(() => initializeApp(firebase)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideMessaging(() => getMessaging()),
