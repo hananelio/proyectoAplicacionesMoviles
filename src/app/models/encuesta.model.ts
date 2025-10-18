@@ -1,5 +1,4 @@
 import { Asignacion } from './asignacion.model';
-import { Timestamp } from 'firebase/firestore';
 import { Seccion } from './seccion.model';
 
 export interface Encuesta {
@@ -7,10 +6,10 @@ export interface Encuesta {
     titulo: string;
     descripcion?: string;
     creadorId: string;        // id del diseñador (Usuario)
-    fechaCreacion: Timestamp; // Fecha de creación
-    fechaActualizacion?: Timestamp; // Fecha de última actualización
-    fechaPublicacion?: Timestamp;   // Fecha de publicación
-    fechaCierre?: Timestamp;        // Fecha de cierre
+    fechaCreacion: string; // Fecha de creación
+    fechaActualizacion?: string; // Fecha de última actualización
+    fechaPublicacion?: string;   // Fecha de publicación
+    fechaCierre?: string;        // Fecha de cierre
     estado: 'borrador' | 'publicada' | 'archivada';
 
     // Subcolecciones

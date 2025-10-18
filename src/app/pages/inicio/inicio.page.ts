@@ -3,14 +3,13 @@ import { Router } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../header/header.component';
-import { NavbarComponent } from 'src/app/components/navbar/navbar.component';
 
 @Component({
   selector: 'app-inicio',
   templateUrl: './inicio.page.html',
   styleUrls: ['./inicio.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, HeaderComponent, NavbarComponent], 
+  imports: [IonicModule, CommonModule, HeaderComponent], 
 })
 export class InicioPage {
   constructor(private router: Router) {}
