@@ -11,7 +11,7 @@ import { FirestoreMapear } from 'src/app/core/helpers/firestore-mapear.helper';
 })
 export class EncuestaService {
   // https://firestore.googleapis.com/v1/projects/[PROJECT_ID]/databases/(default)/documents/[COLLECTION]
-  private base = `https://firestore.googleapis.com/v1/projects/${environment.firebaseConfig.projectId}/databases/(default)/documents`;
+  private base = `https://firestore.googleapis.com/v1/projects/${environment.firebase.projectId}/databases/(default)/documents`;
   private collection = 'encuestas';
 
   constructor(

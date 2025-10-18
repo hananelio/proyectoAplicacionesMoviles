@@ -17,7 +17,7 @@ export class AuthRestService {
   }
 
   signInEmailPassword(email : string, password : string) : Observable<string> {
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.firebaseConfig.apiKey}`;
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.firebase.apiKey}`;
     return this.http.post<AuthResponse>(url, {
       email, password, returnSecureToken: true
     }).pipe(
