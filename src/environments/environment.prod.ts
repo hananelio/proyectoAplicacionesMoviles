@@ -6,6 +6,6 @@ export const environment = {
     projectId: "appencuestabd",
     storageBucket: "appencuestabd.firebasestorage.app",
     messagingSenderId: "765801133121",
-    appId: "1:765801133121:web:7ff2d7ddee72e87b8e82c0"
+    appId: "1:765801133121:web:e001835160ebd80f8e82c0"
   }
 };

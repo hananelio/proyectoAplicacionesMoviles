@@ -10,7 +10,7 @@ import { EncuestaListaComponent } from "../encuesta-lista/encuesta-lista.compone
   templateUrl: './inicio.page.html',
   styleUrls: ['./inicio.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, HeaderComponent, EncuestaListaComponent], 
+  imports: [IonicModule, CommonModule, HeaderComponent], 
 })
 export class InicioPage {
   constructor(private router: Router) {}

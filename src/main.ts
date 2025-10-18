@@ -22,20 +22,14 @@ import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 import { provideMessaging, getMessaging } from '@angular/fire/messaging';
 import { provideStorage, getStorage } from '@angular/fire/storage';
 
-const firebase = {
+const firebaseConfig = {
   projectId: 'appencuestabd',
-  appId: '1:765801133121:web:7ff2d7ddee72e87b8e82c0',
+  appId: '1:765801133121:web:e001835160ebd80f8e82c0',
   storageBucket: 'appencuestabd.appspot.com',
   apiKey: 'AIzaSyBnB85iMGWfozIK-0FGSwjCKRIZNLU_JAc',
   authDomain: 'appencuestabd.firebaseapp.com',
   messagingSenderId: '765801133121'
 };
-
-// Registrar iconos manualmente
-/*addIcons({
-  'mail-open-outline': mailOpenOutline,
-  'lock-closed-outline': lockClosedOutline
-});*/
 
 // Inicializa los elementos PWA de Ionic
 defineCustomElements(window);
@@ -46,7 +40,7 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(HttpClientModule),
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    provideFirebaseApp(() => initializeApp(firebase)),
+    provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideMessaging(() => getMessaging()),
