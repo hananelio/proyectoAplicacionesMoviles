@@ -13,8 +13,11 @@
       <p><b>Descripción:</b> {{ encuesta.descripcion }}</p>
       <p><b>Estado:</b> {{ encuesta.estado }}</p>
       <p><b>Fecha creación:</b> {{ encuesta.fechaCreacion | date: 'short' }}</p>
+      <p><b>Fecha actualización:</b> {{ encuesta.fechaActualizacion | date: 'short' }}</p>
+      <p><b>Fecha publicación:</b> {{ encuesta.fechaPublicacion | date: 'short' }}</p>
+      <p><b>Fecha cierre:</b> {{ encuesta.fechaCierre | date: 'short' }}</p>
     </ion-card-content>
   </ion-card>
 
-  <ion-button expand="block" (click)="volver()">Volver</ion-button>
+  <ion-button expand="block" [routerLink]="['/encuesta-list']">Volver</ion-button>
 </ion-content>

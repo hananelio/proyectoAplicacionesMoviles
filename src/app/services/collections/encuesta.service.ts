@@ -44,11 +44,12 @@ export class EncuestaService {
     );
   }
 
-  create(enc : Encuesta) : Observable<Encuesta>{
+  create(encuesta : Encuesta) : Observable<Encuesta>{
     const url = `${this.base}/${this.collection}`;
     const body = FirestoreMapear.encuestaToFirestore({
-      ...enc,
-      fechaCreacion : enc.fechaCreacion ?? new Date().toISOString()
+      ...encuesta,
+      fechaCreacion : encuesta.fechaCreacion ?? new Date().toISOString(),
+      fechaActualizacion: encuesta.fechaActualizacion ?? new Date().toISOString()
     });
 
     return this.http.post<any>(url, body, {headers : this.headers() }).pipe(
@@ -58,7 +59,11 @@ export class EncuestaService {
 
   update(id : string, partial : Partial<Encuesta>) : Observable<Encuesta> {
     const url = `${this.base}/${this.collection}/${id}`;
-    const body = FirestoreMapear.encuestaToFirestore(partial as Encuesta);
+    const body = FirestoreMapear.encuestaToFirestore( {
+      ...partial,
+      fechaActualizacion: new Date().toISOString()
+    } as Encuesta);
+    
     const fields = Object.keys((body as any).fields || {});
     let params = new HttpParams();
     fields.forEach(k => params = params.append('updateMask.fieldPaths', k));

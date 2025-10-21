@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController } from '@ionic/angular'
 import { Encuesta } from 'src/app/models/encuesta.model';
 import { EncuestaService } from 'src/app/services/collections/encuesta.service';
-import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { EncuestaStateService } from 'src/app/services/core/encuesta-state.service';
 
 @Component({
@@ -14,7 +14,7 @@ import { EncuestaStateService } from 'src/app/services/core/encuesta-state.servi
   styleUrls: ['./encuesta-list.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule, IonicModule
+    CommonModule, FormsModule, IonicModule, RouterLink
   ]
 })
 export class EncuestaListPage implements OnInit {
@@ -25,7 +25,6 @@ export class EncuestaListPage implements OnInit {
   constructor(
     private encuestaService: EncuestaService,
     private alertCtrl: AlertController,
-    private router: Router,
     private encuestaState: EncuestaStateService
   ) { }
 
@@ -48,22 +47,10 @@ export class EncuestaListPage implements OnInit {
     });
   }
 
-  nuevaEncuesta() {
-    this.router.navigate(['/encuesta/nueva']);
-  };
-
-  editarEncuesta(id: string) {
-    this.router.navigate(['/encuesta/editar', id]);
-  }
-
-  verEncuesta(id: string) {
-    this.router.navigate(['/encuesta/detalle', id])
-  }
-
   async eliminarEncuesta(encuesta: Encuesta){
     const alert = await this.alertCtrl.create({
       header: 'Confirmar',
-      message: `¿Eliminar la encuesta <b>${encuesta.titulo}</b>"?`,
+      message: `¿Eliminar la encuesta ${encuesta.titulo.toUpperCase()}?`,
       buttons : [
         { text: 'Cancelar', role: 'cancel' },
         { 

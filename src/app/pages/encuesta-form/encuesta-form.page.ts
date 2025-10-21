@@ -23,6 +23,9 @@ export class EncuestaFormPage implements OnInit {
     descripcion: '',
     creadorId: '',
     fechaCreacion: new Date().toISOString(),
+    fechaActualizacion: '',
+    fechaPublicacion: '',
+    fechaCierre: '',
     estado: 'borrador'
   };
 
@@ -48,7 +51,8 @@ export class EncuestaFormPage implements OnInit {
     if (this.id) {
       // Editar encuesta
       this.editMode = true;
-      this.encuestaService.getById(this.id).subscribe(data => this.encuesta = data);
+      this.encuestaService.getById(this.id)
+        .subscribe(data => this.encuesta = data);
     } else {
       // Crear nueva encuesta → reiniciar los campos
       this.editMode = false;
@@ -58,6 +62,9 @@ export class EncuestaFormPage implements OnInit {
         descripcion: '',
         creadorId: '',
         fechaCreacion: new Date().toISOString(),
+        fechaActualizacion: new Date().toISOString(),
+        fechaPublicacion: new Date(0).toISOString(),
+        fechaCierre: new Date(0).toISOString(),
         estado: 'borrador'
       };
     }
@@ -76,9 +83,11 @@ export class EncuestaFormPage implements OnInit {
     }
 
     if (this.editMode) {
-      this.encuestaService.update(this.id,this.encuesta).subscribe(() => this.volver());
+      this.encuestaService.update(this.id,this.encuesta)
+        .subscribe(() => this.volver());
     } else {
-      this.encuestaService.create(this.encuesta).subscribe(() => this.volver());
+      this.encuestaService.create(this.encuesta)
+        .subscribe(() => this.volver());
     }
   }
 

@@ -1,9 +1,3 @@
-<!--<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>home</ion-title>
-  </ion-toolbar>
-</ion-header>-->
-
 <ion-content [fullscreen]="true" class="login-content">
   <ion-grid>
     <ion-row class="ion-justify-content-center ion-align-items-center" style="height: 100vh;">
@@ -21,10 +15,10 @@
                 <ion-input formControlName="email" type="email" autocomplete="email" placeholder="Correo Electrónico"></ion-input>
               </ion-item>
               <div class="error" *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.touched || loginForm.get('email')?.dirty)">
-                <!--<small *ngIf="loginForm.get('email')?.errors?.['required']">El correo es requerido.</small>
-                <small *ngIf="loginForm.get('email')?.errors?.['email']">Formato inválido.</small>-->
-                <small *ngIf="password?.errors?.['required']">El correo es requerido.</small>
-                <small *ngIf="password?.errors?.['minlength']">Formato inválido.</small>
+                <small *ngIf="loginForm.get('email')?.errors?.['required']">El correo es requerido.</small>
+                <small *ngIf="loginForm.get('email')?.errors?.['email']">Formato inválido.</small>
+                <!--<small *ngIf="password?.errors?.['required']">El correo es requerido.</small>
+                <small *ngIf="password?.errors?.['minlength']">Formato inválido.</small>-->
               </div>
 
               <ion-item>

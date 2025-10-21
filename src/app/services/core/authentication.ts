@@ -7,7 +7,7 @@ import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 })
 export class Authentication {
   private auth = inject(Auth); // ✅ garantiza el contexto de inyección
-   
+  
   login(email: string, password: string) {
     return signInWithEmailAndPassword(this.auth, email, password);
   }

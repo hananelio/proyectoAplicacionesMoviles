@@ -2,7 +2,7 @@
   <ion-toolbar color="primary">
     <ion-title>Encuestas</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="nuevaEncuesta()">Nueva</ion-button>
+      <ion-button [routerLink]="['/encuesta/nueva']">Nueva</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -15,11 +15,13 @@
       <ion-label>
         <h2>{{ encuesta.titulo }}</h2>
         <p>{{ encuesta.descripcion }}</p>
+        <p>Creado el {{ encuesta.fechaCreacion | date: 'short' }}</p>
+        <p>Actualizado el {{ encuesta.fechaActualizacion | date: 'short' }}</p>
       </ion-label>
 
       <ion-buttons slot="end">
-        <ion-button color="primary" (click)="verEncuesta(encuesta.id)">Ver</ion-button>
-        <ion-button color="warning" (click)="editarEncuesta(encuesta.id)">Editar</ion-button>
+        <ion-button color="primary" [routerLink] = "['/encuesta/detalle', encuesta.id]">Ver</ion-button>
+        <ion-button color="warning" [routerLink] = "['/encuesta/editar', encuesta.id]">Editar</ion-button>
         
         <ion-button color="danger" (click)="eliminarEncuesta(encuesta)">Eliminar</ion-button>
       </ion-buttons>

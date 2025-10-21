@@ -6,7 +6,8 @@ import { CommonModule } from '@angular/common';
 import {  } from "@ionic/angular/standalone";
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Authentication } from 'src/app/services/core/authentication';
+import { AuthRestService } from 'src/app/services/core/auth-rest.service';
+//import { Authentication } from 'src/app/services/core/authentication';
 //import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { Images } from '../../services/core/images';
 import { HttpClientModule } from '@angular/common/http';
@@ -29,10 +30,9 @@ export class HomePage { //FormLoginComponent
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authentication: Authentication,
+    private authentication: AuthRestService,
     private imagesService: Images//private http: HttpClient
   ) {
-
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(4)]]
@@ -40,6 +40,7 @@ export class HomePage { //FormLoginComponent
   }
 
   ngOnInit() {
+    this.checkSession();
     this.loadImages();
   }
   /*async ngOnInit() {
@@ -52,8 +53,14 @@ export class HomePage { //FormLoginComponent
     }
   }*/
   
-  get email() { return this.loginForm.get('email'); }
-  get password() { return this.loginForm.get('password'); }
+  //get email() { return this.loginForm.get('email'); }
+  //get password() { return this.loginForm.get('password'); }
+  private checkSession () {
+    const token = this.authentication.getToken();
+    if (token) {
+      this.router.navigateByUrl('/inicio');
+    }
+  }
 
   async loadImages() {
     try {
@@ -81,25 +88,30 @@ export class HomePage { //FormLoginComponent
 
     this.isSubmitting = true;
     const { email, password } = this.loginForm.value;
-
-    try {
-      await this.authentication.login(email, password);
-      //await signInWithEmailAndPassword(this.auth, email, password);
-      await this.router.navigateByUrl('/inicio', { replaceUrl: true }); // o redirige a otra página si tienes
-    } catch (error: any) {
-      this.loginError = this.getFirebaseErrorMessage(error.code);
-    }
-
-    this.isSubmitting = false;
+    
+    this.authentication.signInEmailPassword(email, password).subscribe({
+        next: async (token) => {
+        console.log('Token recibido:', token);
+        await this.router.navigateByUrl('/inicio', { replaceUrl: true });
+      },
+      error: (err) => {
+        console.error('Error en login:', err);
+        this.loginError = this.getFirebaseErrorMessage(err.error?.error?.message);
+        this.isSubmitting = false;
+      },
+      complete: () => {
+        this.isSubmitting = false;
+      }
+    });
   }
 
-  private getFirebaseErrorMessage(code: string): string {
-    switch (code) {
-      case 'auth/user-not-found':
+  private getFirebaseErrorMessage(message: string): string {
+    switch (message) {
+      case 'EMAIL_NOT_FOUND':
         return 'Usuario no registrado.';
-      case 'auth/wrong-password':
+      case 'INVALID_PASSWORD':
         return 'Contraseña incorrecta.';
-      case 'auth/invalid-email':
+      case 'INVALID_EMAIL':
         return 'Correo inválido.';
       default:
         return 'Error al iniciar sesión.';
