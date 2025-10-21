@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Detalle de Encuesta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" *ngIf="encuesta">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ encuesta.titulo }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p><b>Descripción:</b> {{ encuesta.descripcion }}</p>
+      <p><b>Estado:</b> {{ encuesta.estado }}</p>
+      <p><b>Fecha creación:</b> {{ encuesta.fechaCreacion | date: 'short' }}</p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button expand="block" (click)="volver()">Volver</ion-button>
+</ion-content>

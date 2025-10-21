@@ -21,10 +21,10 @@ export class EncuestaListaComponent  implements OnInit {
   constructor(private encuestaService : EncuestaService) { }
 
   ngOnInit() {
-    this.cargarEncuesta();
+    this.loadEncuesta();
   }
 
-  cargarEncuesta(){
+  loadEncuesta(){
     this.loading = true;
     this.encuestaService.getAll().subscribe({
       next : data => {

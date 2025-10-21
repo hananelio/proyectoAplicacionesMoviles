@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>{{ editMode ? 'Editar Encuesta' : 'Nueva Encuesta' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-list>
+    <ion-item>
+      <ion-input
+        label="Título"
+        labelPlacement="floating"
+        [(ngModel)]="encuesta.titulo"
+        required>
+      </ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-textarea
+        label="Descripción"
+        labelPlacement="floating"
+        [(ngModel)]="encuesta.descripcion">
+      </ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-select
+        label="Estado"
+        labelPlacement="floating"
+        [(ngModel)]="encuesta.estado">
+        <ion-select-option value="borrador">Borrador</ion-select-option>
+        <ion-select-option value="publicada">Publicada</ion-select-option>
+        <ion-select-option value="archivada">Archivada</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+
+  <ion-button expand="block" color="success" (click)="guardar()">
+    {{ editMode ? 'Actualizar' : 'Guardar' }}
+  </ion-button>
+</ion-content>
+

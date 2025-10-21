@@ -19,5 +19,31 @@ export const routes: Routes = [
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',
+  },
+  {
+    path: 'encuesta-list',
+    loadComponent: () => import('./pages/encuesta-list/encuesta-list.page').then( m => m.EncuestaListPage)
+  },
+
+  {
+    path: 'encuesta-form',
+    loadComponent: () => import('./pages/encuesta-form/encuesta-form.page').then(m => m.EncuestaFormPage)
+  },
+
+  //✅ Rutas para CRUD
+  {
+    path: 'encuesta/nueva',
+    loadComponent: () => import('./pages/encuesta-form/encuesta-form.page')
+      .then(m => m.EncuestaFormPage)
+  },
+  {
+    path: 'encuesta/editar/:id',
+    loadComponent: () => import('./pages/encuesta-form/encuesta-form.page')
+      .then(m => m.EncuestaFormPage)
+  },
+  {
+    path: 'encuesta/detalle/:id',
+    loadComponent: () => import('./pages/encuesta-detail/encuesta-detail.page')
+      .then(m => m.EncuestaDetailPage)
   }
 ];

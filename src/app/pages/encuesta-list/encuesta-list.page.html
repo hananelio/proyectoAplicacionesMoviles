@@ -1,0 +1,32 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Encuestas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="nuevaEncuesta()">Nueva</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
+
+  <ion-list *ngIf="!cargando && encuestas.length > 0">
+    <ion-item *ngFor="let encuesta of encuestas">
+      <ion-label>
+        <h2>{{ encuesta.titulo }}</h2>
+        <p>{{ encuesta.descripcion }}</p>
+      </ion-label>
+
+      <ion-buttons slot="end">
+        <ion-button color="primary" (click)="verEncuesta(encuesta.id)">Ver</ion-button>
+        <ion-button color="warning" (click)="editarEncuesta(encuesta.id)">Editar</ion-button>
+        
+        <ion-button color="danger" (click)="eliminarEncuesta(encuesta)">Eliminar</ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
+
+  <ion-text color="medium" *ngIf="!cargando && encuestas.length === 0">
+    No hay encuestas registradas.
+  </ion-text>
+</ion-content>
