@@ -22,7 +22,8 @@ export const routes: Routes = [
   },
   {
     path: 'encuesta-list',
-    loadComponent: () => import('./pages/encuesta-list/encuesta-list.page').then( m => m.EncuestaListPage)
+    loadComponent: () => import('./pages/encuesta-list/encuesta-list.page').then( m => m.EncuestaListPage),
+    data: { title: 'Encuestas' }
   },
 
   {

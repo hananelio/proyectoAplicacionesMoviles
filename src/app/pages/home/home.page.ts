@@ -1,6 +1,6 @@
 import { IonicModule } from '@ionic/angular';
 import { Component} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 //import { FormLoginComponent } from '../form-login/form-login.component';
 //aumento de imports
 import {  } from "@ionic/angular/standalone";
@@ -18,7 +18,8 @@ import { HttpClientModule } from '@angular/common/http';
   styleUrls: ['./home.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, IonicModule, ReactiveFormsModule, HttpClientModule
+    CommonModule, IonicModule, ReactiveFormsModule,
+    HttpClientModule, NgIf
   ]
 })
 export class HomePage { //FormLoginComponent

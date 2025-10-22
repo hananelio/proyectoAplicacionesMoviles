@@ -1,32 +1,39 @@
 import { Component, OnInit } from '@angular/core';
-import {  } from "@ionic/angular/standalone";
-import { CommonModule } from '@angular/common';
-import { Images } from '../../services/core/images';
-import { HttpClientModule } from '@angular/common/http';
-import { filter, map } from 'rxjs/operators';
-import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { CommonModule, NgIf } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
+import { HttpClientModule } from '@angular/common/http';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { filter, map } from 'rxjs/operators';
+import { Images } from '../../services/core/images';
+import { AuthRestService } from 'src/app/services/core/auth-rest.service';
+
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
-  imports: [ CommonModule, IonicModule,
-    HttpClientModule],
+  imports: [
+    CommonModule, IonicModule,
+    HttpClientModule, NgIf
+  ],
   standalone: true,
 })
 export class HeaderComponent  implements OnInit {
   pageTitle: string = '';
+  userEmail: string = '';
   images: Record<string, any> = {};
 
   constructor(
     private imagesService: Images,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authService: AuthRestService
   ) { }
 
   ngOnInit() {
     this.loadImages();
+
+    this.userEmail = this.authService.getUserEmail() || 'Invitado';
     
     this.router.events
     .pipe(
