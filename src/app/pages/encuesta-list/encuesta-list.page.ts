@@ -9,7 +9,6 @@ import { RouterLink } from '@angular/router';
 import { EncuestaStateService } from 'src/app/services/core/encuesta-state.service';
 import { HeaderComponent } from '../header/header.component';
 import { Location } from '@angular/common';
-import { FabButtonComponent } from '../fab-button/fab-button.component';
 
 @Component({
   selector: 'app-encuesta-list',
@@ -18,7 +17,7 @@ import { FabButtonComponent } from '../fab-button/fab-button.component';
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonicModule,
-    RouterLink, HeaderComponent, FabButtonComponent
+    RouterLink, HeaderComponent
 ]
 })
 export class EncuestaListPage implements OnInit {
