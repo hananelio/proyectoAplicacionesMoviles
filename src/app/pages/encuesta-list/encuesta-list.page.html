@@ -8,8 +8,8 @@
       <ion-label>
         <h2>{{ encuesta.titulo }}</h2>
         <p>{{ encuesta.descripcion }}</p>
-        <p>Creado el {{ encuesta.fechaCreacion | date: 'short' }}</p>
-        <p>Actualizado el {{ encuesta.fechaActualizacion | date: 'short' }}</p>
+        <p>Creado el {{ encuesta.fechaCreacion | date:'dd/MM/yyyy, hh:mm a' }}</p>
+        <p>Actualizado el {{ encuesta.fechaActualizacion | date:'dd/MM/yyyy, hh:mm a' }}</p>
       </ion-label>
 
       <ion-buttons slot="end">
@@ -24,4 +24,16 @@
   <ion-text color="medium" *ngIf="!cargando && encuestas.length === 0">
     No hay encuestas registradas.
   </ion-text>
+
+<ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab-button color="primary" [routerLink]="['/encuesta/nueva']">
+    <i class="fa-solid fa-plus fa-2x" style="color: white;"></i>
+  </ion-fab-button>
+</ion-fab>
+
+<ion-fab vertical="bottom" horizontal="start" slot="fixed">
+  <ion-fab-button color="primary" [routerLink]="['/inicio']">
+    <i class="fa-solid fa-hand-point-left fa-2x" style="color: white;"></i>
+  </ion-fab-button>
+</ion-fab>
 </ion-content>

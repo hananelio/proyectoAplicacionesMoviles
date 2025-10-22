@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuthRestService } from '../core/auth-rest.service';
-import { Observable, map } from 'rxjs';
+import { Observable, map, switchMap } from 'rxjs';
 import { Encuesta} from '../../models/encuesta.model'
 import { environment } from 'src/environments/environment';
 import { FirestoreMapear } from 'src/app/core/helpers/firestore-mapear.helper';
@@ -9,6 +9,7 @@ import { FirestoreMapear } from 'src/app/core/helpers/firestore-mapear.helper';
 @Injectable({
   providedIn: 'root'
 })
+
 export class EncuestaService {
   // https://firestore.googleapis.com/v1/projects/[PROJECT_ID]/databases/(default)/documents/[COLLECTION]
   private base = `https://firestore.googleapis.com/v1/projects/${environment.firebase.projectId}/databases/(default)/documents`;
@@ -19,28 +20,37 @@ export class EncuestaService {
     private auth : AuthRestService
   ){ }
 
-  private headers() : HttpHeaders {
-    const token = this.auth.getToken();
-
-    return new HttpHeaders({
-      'Content-Type' : 'application/json',
-      ...( token ? { Authorization : `Bearer ${token}` } : {})
-    })
+  // ✅ Esta función genera los headers luego de obtener el token válido
+  private headers() {
+    return this.auth.getToken().pipe(
+      map(token => new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }))
+    );
   }
 
   getAll() : Observable<Encuesta[]> {
     const url = `${this.base}/${this.collection}`;
 
-    return this.http.get<any>(url, { headers : this.headers() }).pipe(
-      map(resp => (resp.documents ?? []).map((d : any) => FirestoreMapear.encuestaFromFirestore(d)))
+    return this.headers().pipe(
+      switchMap(headers =>
+        this.http.get<any>(url, { headers }).pipe(
+          map(resp => (resp.documents ?? []).map((d: any) => FirestoreMapear.encuestaFromFirestore(d)))
+        )
+      )
     );
   }
 
   getById(id : string) : Observable<Encuesta> {
     const url = `${this.base}/${this.collection}/${id}`;
-
-    return this.http.get<any>(url, { headers : this.headers() }).pipe(
-      map(doc => FirestoreMapear.encuestaFromFirestore(doc))
+    
+    return this.headers().pipe(
+      switchMap(headers =>
+        this.http.get<any>(url, { headers }).pipe(
+          map(doc => FirestoreMapear.encuestaFromFirestore(doc))
+        )
+      )
     );
   }
 
@@ -51,9 +61,13 @@ export class EncuestaService {
       fechaCreacion : encuesta.fechaCreacion ?? new Date().toISOString(),
       fechaActualizacion: encuesta.fechaActualizacion ?? new Date().toISOString()
     });
-
-    return this.http.post<any>(url, body, {headers : this.headers() }).pipe(
-      map(doc => FirestoreMapear.encuestaFromFirestore(doc))
+    
+    return this.headers().pipe(
+      switchMap(headers =>
+        this.http.post<any>(url, body, { headers }).pipe(
+          map(doc => FirestoreMapear.encuestaFromFirestore(doc))
+        )
+      )
     );
   }
 
@@ -68,8 +82,12 @@ export class EncuestaService {
     let params = new HttpParams();
     fields.forEach(k => params = params.append('updateMask.fieldPaths', k));
 
-    return this.http.patch<any>(url, body, { headers : this.headers(), params }).pipe(
-      map(doc => FirestoreMapear.encuestaFromFirestore(doc))
+    return this.headers().pipe(
+      switchMap(headers =>
+        this.http.patch<any>(url, body, { headers, params }).pipe(
+          map(doc => FirestoreMapear.encuestaFromFirestore(doc))
+        )
+      )
     );
   }
 
@@ -79,7 +97,9 @@ export class EncuestaService {
 
   delete(id : string) : Observable<void> {
     const url = `${this.base}/${this.collection}/${id}`;
-    return this.http.delete<void>(url, { headers : this.headers() });
+    
+    return this.headers().pipe(
+      switchMap(headers => this.http.delete<void>(url, { headers }))
+    );
   }
 }
-

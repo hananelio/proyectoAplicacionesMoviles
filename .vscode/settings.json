@@ -1,5 +1,6 @@
 {
   "typescript.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular"],
   "emulator.emulatorPath": "C:/Android/sdk/emulator",
-  "editor.fontSize": 20
+  "editor.fontSize": 20,
+  "emulator.androidColdBoot": true
 }

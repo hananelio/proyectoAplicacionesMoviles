@@ -1,15 +1,18 @@
 ion-header {
+  //padding-top: env(safe-area-inset-top);
+  padding-top: 35px !important; /* 🔹 espacio manual para notch */
   --background: linear-gradient(135deg, #004aad, #0078d7);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .custom-toolbar {
+  //min-height: 64px; /* o 64px para pantallas más altas */
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-inline: 8px;
-  color: aqua /*#fff*/;
-  --color: aqua /*#fff*/;
+  color: blue /*#fff*/;
+  --color: blue /*#fff*/;
 }
 
 .header-center {
@@ -25,11 +28,13 @@ ion-title {
   font-weight: 600;
   font-size: 1.2rem;
   letter-spacing: 0.5px;
-  color: aqua/*#ffffff*/;
+  color: blue/*#ffffff*/;
 }
 
 .logo {
-  height: 36px;
+  height: 70px;
+  width: 70px;
+  max-height: 100px;
   max-width: 100px;
   object-fit: contain;
   border-radius: 6px;
@@ -50,7 +55,7 @@ ion-button {
 
 ion-icon {
   font-size: 1.4rem;
-  color: aqua;
+  color: red;
 }
 /* header.component.scss */
 /*.logo {

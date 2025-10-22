@@ -57,10 +57,19 @@ export class HomePage { //FormLoginComponent
   //get email() { return this.loginForm.get('email'); }
   //get password() { return this.loginForm.get('password'); }
   private checkSession () {
-    const token = this.authentication.getToken();
+    this.authentication.getToken().subscribe({
+      next: token => {
+        console.log('Token válido encontrado:', token);
+        this.router.navigateByUrl('/inicio');
+      },
+      error: err => {
+        console.log('No hay sesión activa:', err);
+      }
+    });
+    /*const token = this.authentication.getToken();
     if (token) {
       this.router.navigateByUrl('/inicio');
-    }
+    }*/
   }
 
   async loadImages() {
@@ -91,13 +100,13 @@ export class HomePage { //FormLoginComponent
     const { email, password } = this.loginForm.value;
     
     this.authentication.signInEmailPassword(email, password).subscribe({
-        next: async (token) => {
+      next: token => {
         console.log('Token recibido:', token);
-        await this.router.navigateByUrl('/inicio', { replaceUrl: true });
+        this.router.navigateByUrl('/inicio', { replaceUrl: true });
       },
       error: (err) => {
         console.error('Error en login:', err);
-        this.loginError = this.getFirebaseErrorMessage(err.error?.error?.message);
+        this.loginError = this.getFirebaseErrorMessage(err);
         this.isSubmitting = false;
       },
       complete: () => {

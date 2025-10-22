@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { HttpClientModule } from '@angular/common/http';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
@@ -27,7 +27,8 @@ export class HeaderComponent  implements OnInit {
     private imagesService: Images,
     private router: Router,
     private route: ActivatedRoute,
-    private authService: AuthRestService
+    private authService: AuthRestService,
+    private toastCtrl: ToastController
   ) { }
 
   ngOnInit() {
@@ -43,9 +44,6 @@ export class HeaderComponent  implements OnInit {
     .subscribe(snapshot => {
       this.pageTitle = snapshot?.data['title'] || 'Aplicación';
     });
-    /*.subscribe((event: NavigationEnd) => {
-      this.setPageTitle(event.urlAfterRedirects);
-    });*/
   }
 
   async loadImages() {
@@ -73,20 +71,17 @@ export class HeaderComponent  implements OnInit {
     return route.snapshot;//return child?.snapshot || null;
   }
 
-  /*setPageTitle(url: string) {
-    switch (url) {
-      case '/inicio':
-        this.pageTitle = 'Inicio';
-        break;
-      case '/menu':
-        this.pageTitle = 'Menú';
-        break;
-      case '/perfil':
-        this.pageTitle = 'Perfil';
-        break;
-      default:
-        this.pageTitle = '';
-    }
-  }*/
-}
+  async onSignOut() {
+    this.authService.signOut();
 
+    const toast = await this.toastCtrl.create({
+      message: 'Sesión cerrada correctamente',
+      duration: 2000,
+      color: 'success',
+      position: 'bottom'
+    });
+
+    await toast.present();
+    this.router.navigate(['/home'])
+  }
+}

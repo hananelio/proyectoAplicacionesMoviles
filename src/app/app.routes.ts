@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
-import { HomePage } from './pages/home/home.page'; // ajusta la ruta si es necesario
-
+import { authGuard } from './core/auth-guard';
 
 export const routes: Routes = [
   {
@@ -22,29 +21,41 @@ export const routes: Routes = [
   },
   {
     path: 'encuesta-list',
-    loadComponent: () => import('./pages/encuesta-list/encuesta-list.page').then( m => m.EncuestaListPage),
-    data: { title: 'Encuestas' }
+    loadComponent: () => import('./pages/encuesta-list/encuesta-list.page')
+      .then( m => m.EncuestaListPage),
+    
+    data: { title: 'Encuestas' },
+    canActivate: [authGuard]   // 🔒 protegida
   },
 
   {
     path: 'encuesta-form',
-    loadComponent: () => import('./pages/encuesta-form/encuesta-form.page').then(m => m.EncuestaFormPage)
+    loadComponent: () => import('./pages/encuesta-form/encuesta-form.page')
+      .then(m => m.EncuestaFormPage),
+    
+    canActivate: [authGuard]
   },
 
   //✅ Rutas para CRUD
   {
     path: 'encuesta/nueva',
     loadComponent: () => import('./pages/encuesta-form/encuesta-form.page')
-      .then(m => m.EncuestaFormPage)
+      .then(m => m.EncuestaFormPage),
+    
+    canActivate: [authGuard]
   },
   {
     path: 'encuesta/editar/:id',
     loadComponent: () => import('./pages/encuesta-form/encuesta-form.page')
-      .then(m => m.EncuestaFormPage)
+      .then(m => m.EncuestaFormPage),
+
+    canActivate: [authGuard]
   },
   {
     path: 'encuesta/detalle/:id',
     loadComponent: () => import('./pages/encuesta-detail/encuesta-detail.page')
-      .then(m => m.EncuestaDetailPage)
+      .then(m => m.EncuestaDetailPage),
+    
+    canActivate: [authGuard]
   }
 ];
