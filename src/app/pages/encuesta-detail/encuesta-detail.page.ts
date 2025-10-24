@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Encuesta  } from 'src/app/models/encuesta.model';
 import { EncuestaService } from 'src/app/services/collections/encuesta.service';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, RouterModule, ActivatedRoute } from '@angular/router';
 import { IonicModule } from '@ionic/angular'
+import { HeaderComponent } from "../header/header.component";
 
 @Component({
   selector: 'app-encuesta-detail',
@@ -12,8 +13,9 @@ import { IonicModule } from '@ionic/angular'
   styleUrls: ['./encuesta-detail.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule, IonicModule, RouterLink
-  ]
+    CommonModule, FormsModule, IonicModule, RouterLink,
+    HeaderComponent, RouterModule
+]
 })
 export class EncuestaDetailPage implements OnInit {
   encuesta?: Encuesta;

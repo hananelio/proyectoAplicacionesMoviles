@@ -12,13 +12,11 @@
               <ion-item>
                 <!--<ion-icon slot="start" name="mail-open-outline"></ion-icon>-->
                 <ion-icon slot="start" class="fa-solid fa-envelope"></ion-icon>
-                <ion-input formControlName="email" type="email" autocomplete="email" placeholder="Correo Electrónico"></ion-input>
+                <ion-input formControlName="usernameOrEmail" type="text" autocomplete="username" placeholder="Correo o Username"></ion-input>
               </ion-item>
-              <div class="error" *ngIf="loginForm.get('email')?.invalid && (loginForm.get('email')?.touched || loginForm.get('email')?.dirty)">
-                <small *ngIf="loginForm.get('email')?.errors?.['required']">El correo es requerido.</small>
-                <small *ngIf="loginForm.get('email')?.errors?.['email']">Formato inválido.</small>
-                <!--<small *ngIf="password?.errors?.['required']">El correo es requerido.</small>
-                <small *ngIf="password?.errors?.['minlength']">Formato inválido.</small>-->
+              
+              <div class="error" *ngIf="loginForm.get('usernameOrEmail')?.invalid && (loginForm.get('usernameOrEmail')?.touched || loginForm.get('usernameOrEmail')?.dirty)">
+                <small *ngIf="loginForm.get('usernameOrEmail')?.errors?.['required']">El correo o username es requerido.</small>
               </div>
 
               <ion-item>

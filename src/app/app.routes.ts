@@ -19,6 +19,8 @@ export const routes: Routes = [
     redirectTo: 'home',
     pathMatch: 'full',
   },
+
+  //---------- ENCUESTA ----------
   {
     path: 'encuesta-list',
     loadComponent: () => import('./pages/encuesta-list/encuesta-list.page')
@@ -36,7 +38,25 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
 
-  //✅ Rutas para CRUD
+  //---------- USUARIO ----------
+  {
+    path: 'usuario-list',
+    loadComponent: () => import('./pages/usuario-list/usuario-list.page')
+      .then( m => m.UsuarioListPage),
+    
+    data: { title: 'Usuarios' },
+    canActivate: [authGuard]   // 🔒 protegida
+  },
+
+  {
+    path: 'usuario-form',
+    loadComponent: () => import('./pages/usuario-form/usuario-form.page')
+      .then( m => m.UsuarioFormPage),
+
+    canActivate: [authGuard]
+  },
+
+  //✅ Rutas para CRUD ENCUESTA
   {
     path: 'encuesta/nueva',
     loadComponent: () => import('./pages/encuesta-form/encuesta-form.page')
@@ -56,6 +76,31 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/encuesta-detail/encuesta-detail.page')
       .then(m => m.EncuestaDetailPage),
     
+    data: { title: 'Detalle de Encuesta' },
     canActivate: [authGuard]
-  }
+  },
+
+  //✅ Rutas para CRUD USUARIO
+  {
+    path: 'usuario/nueva',
+    loadComponent: () => import('./pages/usuario-form/usuario-form.page')
+      .then(m => m.UsuarioFormPage),
+    
+    canActivate: [authGuard]
+  },
+  {
+    path: 'usuario/editar/:id',
+    loadComponent: () => import('./pages/usuario-form/usuario-form.page')
+      .then(m => m.UsuarioFormPage),
+
+    canActivate: [authGuard]
+  },
+  {
+    path: 'usuario/detalle/:id',
+    loadComponent: () => import('./pages/usuario-detail/usuario-detail.page')
+      .then(m => m.UsuarioDetailPage),
+    
+      data: { title: 'Detalle de Usuario' },
+    canActivate: [authGuard]
+  },
 ];

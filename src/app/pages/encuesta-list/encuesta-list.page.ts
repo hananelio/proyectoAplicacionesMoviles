@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController } from '@ionic/angular'
@@ -8,6 +8,7 @@ import { RouterLink } from '@angular/router';
 import { EncuestaStateService } from 'src/app/services/core/encuesta-state.service';
 import { HeaderComponent } from '../header/header.component';
 import { Location } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-encuesta-list',
@@ -19,10 +20,12 @@ import { Location } from '@angular/common';
     RouterLink, HeaderComponent
 ]
 })
-export class EncuestaListPage implements OnInit {
+export class EncuestaListPage implements OnInit, OnDestroy {
 
   encuestas : Encuesta[] = [];
   cargando = true;
+
+  private sub!: Subscription;
 
   constructor(
     private encuestaService: EncuestaService,
@@ -31,13 +34,24 @@ export class EncuestaListPage implements OnInit {
     private location: Location
   ) { }
 
-
   ngOnInit() {
-    this.cargarEncuestas();
-    this.encuestaState.refrescar$.subscribe(() => this.cargarEncuestas());
+    this.sub = this.encuestaState.encuestas$.subscribe(
+      data => {
+        this.encuestas = data;
+        this.cargando = false;
+    });
+
+    this.encuestaState.refrescar(); // carga inicial
+    //this.cargarEncuestas();
+    //this.encuestaState.refrescar$.subscribe(() => this.cargarEncuestas());
   }
 
-  cargarEncuestas() {
+  ngOnDestroy() {
+    // 🔒 Evita fugas de memoria al salir de la página
+    if (this.sub) this.sub.unsubscribe();
+  }
+
+  /*cargarEncuestas() {
     this.encuestaService.getAll().subscribe({
       next: (data) => {
         this.encuestas = data;
@@ -48,7 +62,7 @@ export class EncuestaListPage implements OnInit {
         this.cargando = false;
       }
     });
-  }
+  }*/
 
   async eliminarEncuesta(encuesta: Encuesta){
     const alert = await this.alertCtrl.create({
@@ -59,9 +73,17 @@ export class EncuestaListPage implements OnInit {
         { 
           text: 'Eliminar',
           handler: async() => {
+            //this.cargando = true;
+            // 🔹 1. Actualiza visualmente al instante
+            this.encuestaState.eliminarLocal(encuesta.id);
+            
             this.encuestaService.delete(encuesta.id).subscribe({
-              next : () => this.cargarEncuestas(),
-              error : (err) => console.error('Error al eliminar', err)
+              next : () => this.encuestaState.refrescar(),//this.cargarEncuestas()
+              error : (err) => {
+                console.error('Error al eliminar', err);
+                this.encuestaState.refrescar();
+                //this.cargando = false;
+              }
             });
           }
         }

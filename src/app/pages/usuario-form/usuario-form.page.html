@@ -1,0 +1,161 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>{{ editMode ? 'Editar Usuario' : 'Registrar Usuario' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ editMode ? 'Editar datos del usuario' : 'Nuevo usuario' }}</ion-card-title>
+      <ion-card-subtitle>Complete los campos requeridos</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <form #formUsuario="ngForm" (ngSubmit)="guardar()">
+        <ion-grid>
+          
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Nombre</ion-label>
+                <ion-input [(ngModel)]="usuario.firstName" name="firstName" required (ngModelChange)="generarUsernameTemporal()"></ion-input>
+              </ion-item>
+              <ion-note color="danger" *ngIf="formUsuario.submitted && !usuario.firstName">
+                El nombre es obligatorio
+              </ion-note>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Apellido</ion-label>
+                <ion-input [(ngModel)]="usuario.lastName" name="lastName" required (ngModelChange)="generarUsernameTemporal()"></ion-input>
+              </ion-item>
+              <ion-note color="danger" *ngIf="formUsuario.submitted && !usuario.lastName">
+                El apellido es obligatorio
+              </ion-note>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size = "4">
+              <ion-item>
+                <ion-label position="floating">Cédula de identidad</ion-label>
+                <ion-input [(ngModel)]="usuario.ci" name="ci" required></ion-input>
+              </ion-item>
+              <ion-note color="danger" *ngIf="formUsuario.submitted && !usuario.ci">
+                La cédula de identidad es obligatoria
+              </ion-note>
+            </ion-col>
+
+            <ion-col size = "4">
+              <ion-item>
+                <ion-label position="floating">Complemento</ion-label>
+                <ion-input [(ngModel)]="usuario.complemento" name="complemento"></ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="4">
+              <ion-item>
+                <ion-label position="floating">Extensión</ion-label>
+                <ion-select [(ngModel)]="usuario.extension" name="extension" placeholder="Seleccione la extensión" required>
+                  <ion-select-option value="Sc">Santa Cruz</ion-select-option>
+                  <ion-select-option value="Pd">Pando</ion-select-option>
+                  <ion-select-option value="Bn">Beni</ion-select-option>
+                  <ion-select-option value="Tj">Tarija</ion-select-option>
+                  <ion-select-option value="Ch">Chuquisaca</ion-select-option>
+                  <ion-select-option value="Cb">Cochabamba</ion-select-option>
+                  <ion-select-option value="Lp">La Paz</ion-select-option>
+                  <ion-select-option value="Or">Oruro</ion-select-option>
+                  <ion-select-option value="Pt">Potosí</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-note color="danger" *ngIf="formUsuario.submitted && !usuario.extension">
+                La extensión de la cédula de identidad es obligatoria
+              </ion-note>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Correo Electrónico</ion-label>
+                <ion-input type="email" [(ngModel)]="usuario.email" name="email" required></ion-input>
+              </ion-item>
+              <ion-note color="danger" *ngIf="formUsuario.submitted && !usuario.email">
+                El correo es obligatorio
+              </ion-note>
+            </ion-col>
+            
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Teléfono</ion-label>
+                <ion-input type="tel" [(ngModel)]="usuario.telefono" name="telefono"></ion-input>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label>Fecha de Nacimiento</ion-label>
+                <ion-datetime
+                  presentation="date"
+                  [(ngModel)]="usuario.fechaNacimiento"
+                  name="fechaNacimiento"
+                  locale="es-ES"
+                  display-format="DD/MM/YYYY"
+                  required>
+                </ion-datetime>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label>Sexo</ion-label>
+                <ion-select [(ngModel)]="usuario.sexo" name="sexo" placeholder="Seleccione sexo">
+                  <ion-select-option value="hombre">Masculino</ion-select-option>
+                  <ion-select-option value="mujer">Femenino</ion-select-option>
+                </ion-select>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label position="floating">Nombre de usuario</ion-label>
+                <ion-input [(ngModel)]="usuario.username" name="username" readonly></ion-input>
+              </ion-item>
+            </ion-col>
+
+            <ion-col size="12" size-md="6">
+              <ion-item>
+                <ion-label>Rol</ion-label>
+                <ion-select [(ngModel)]="usuario.rol" name="rol" placeholder="Seleccione un rol" required>
+                  <ion-select-option value="encuestador">Encuestador</ion-select-option>
+                  <ion-select-option value="diseñador">Diseñador</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-note color="danger" *ngIf="formUsuario.submitted && !usuario.rol">
+                El rol es obligatorio
+              </ion-note>
+            </ion-col>
+          </ion-row>
+
+          <ion-row>
+            <ion-col size="12" class="ion-text-center ion-padding-top">
+              <ion-button type="submit" color="primary" [disabled]="formUsuario.invalid">
+                {{ editMode ? 'Actualizar' : 'Registrar' }}
+              </ion-button>
+              <ion-button color="medium" fill="outline" [routerLink]="['/usuario-list']">
+                Cancelar
+              </ion-button>
+            </ion-col>
+          </ion-row>
+
+        </ion-grid>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

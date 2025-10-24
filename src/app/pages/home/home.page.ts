@@ -35,7 +35,8 @@ export class HomePage { //FormLoginComponent
     private imagesService: Images//private http: HttpClient
   ) {
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      usernameOrEmail: ['', [Validators.required]],
+      //email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(4)]]
     });
   }
@@ -97,11 +98,12 @@ export class HomePage { //FormLoginComponent
     }
 
     this.isSubmitting = true;
-    const { email, password } = this.loginForm.value;
+    const { usernameOrEmail, password } = this.loginForm.value;
     
-    this.authentication.signInEmailPassword(email, password).subscribe({
+    this.authentication.signInUsernameOrEmail(usernameOrEmail, password).subscribe({
       next: token => {
-        console.log('Token recibido:', token);
+        console.log('Token recibido:', token.slice(0, 20) + '...');
+        console.log('📦 LocalStorage:', localStorage.getItem('idToken'));
         this.router.navigateByUrl('/inicio', { replaceUrl: true });
       },
       error: (err) => {
@@ -118,7 +120,7 @@ export class HomePage { //FormLoginComponent
   private getFirebaseErrorMessage(message: string): string {
     switch (message) {
       case 'EMAIL_NOT_FOUND':
-        return 'Usuario no registrado.';
+        return 'Usuario o correo no registrado.';
       case 'INVALID_PASSWORD':
         return 'Contraseña incorrecta.';
       case 'INVALID_EMAIL':
@@ -128,5 +130,3 @@ export class HomePage { //FormLoginComponent
     }
   }
 }
-
-

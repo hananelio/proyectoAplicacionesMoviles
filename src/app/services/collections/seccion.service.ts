@@ -1,40 +1,101 @@
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { FirestoreCrudService } from '../core/firestore-crud.service';
-import { Seccion } from 'src/app/models/seccion.model';
-import { Observable } from 'rxjs';
+import { AuthRestService } from '../core/auth-rest.service';
+import { Observable, map, switchMap } from 'rxjs';
+import { Seccion} from '../../models/seccion.model'
+import { environment } from 'src/environments/environment';
+import { FirestoreMapear } from 'src/app/core/helpers/firestore-mapear.helper';
 
 @Injectable({
-  providedIn: 'root' // Servicio disponible en toda la aplicación
+  providedIn: 'root'
 })
 
 export class SeccionService {
-  private readonly path = 'secciones'; // Ruta de la colección en Firestore
-  
-  constructor(private crud: FirestoreCrudService<Seccion>) { } // Constructor vacío, no se necesita inyección de dependencias
-  
-  // Métodos específicos para la colección 'secciones'
-  // Método GET que devuelve un Observable de un array de Seccion
-  getAll(): Observable<Seccion[]> { // Obtener todas las secciones
-    return this.crud.getAll(this.path); // Llama al método genérico getAll del servicio CRUD
+  // https://firestore.googleapis.com/v1/projects/[PROJECT_ID]/databases/(default)/documents/[COLLECTION]
+  private base = `https://firestore.googleapis.com/v1/projects/${environment.firebase.projectId}/databases/(default)/documents`;
+  private collection = 'secciones';
+
+  constructor(
+    private  http : HttpClient,
+    private auth : AuthRestService
+  ){ }
+
+  // ✅ Esta función genera los headers luego de obtener el token válido
+  private headers() {
+    return this.auth.getToken().pipe(
+      map(token => new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }))
+    );
   }
 
-  // Método GET que devuelve un Observable de un solo Seccion por ID
-  getById(id: string): Observable<Seccion | undefined> { // Obtener una sección por ID
-    return this.crud.getById(this.path, id); // Llama al método genérico getById del servicio CRUD
+  getAll() : Observable<Seccion[]> {
+    const url = `${this.base}/${this.collection}`;
+
+    return this.headers().pipe(
+      switchMap(headers =>
+        this.http.get<any>(url, { headers }).pipe(
+          map(resp => (resp.documents ?? []).map((d: any) => FirestoreMapear.encuestaFromFirestore(d)))
+        )
+      )
+    );
   }
 
-  // Método POST que crea un nuevo Seccion y devuelve una promesa con la referencia del documento creado
-  create(data: Seccion): Promise<any> { // Crear una nueva sección
-    return this.crud.create(this.path, data); // Llama al método genérico create del servicio CRUD
+  getById(id : string) : Observable<Seccion> {
+    const url = `${this.base}/${this.collection}/${id}`;
+    
+    return this.headers().pipe(
+      switchMap(headers =>
+        this.http.get<any>(url, { headers }).pipe(
+          map(doc => FirestoreMapear.seccionFromFirestore(doc))
+        )
+      )
+    );
   }
 
-  // Método PUT que actualiza un Seccion existente y devuelve una promesa
-  update(id: string, data: Partial<Seccion>): Promise<void> { // Actualizar una sección existente
-    return this.crud.update(this.path, id, data); // Llama al método genérico update del servicio CRUD
+  create(seccion : Seccion) : Observable<Seccion>{
+    const url = `${this.base}/${this.collection}`;
+    const body = FirestoreMapear.seccionToFirestore(seccion);
+    
+    return this.headers().pipe(
+      switchMap(headers =>
+        this.http.post<any>(url, body, { headers }).pipe(
+          map(doc => FirestoreMapear.seccionFromFirestore(doc))
+        )
+      )
+    );
   }
 
-  // Método DELETE que elimina un Seccion por ID y devuelve una promesa
-  delete(id: string): Promise<void> { // Eliminar una sección por ID
-    return this.crud.delete(this.path, id); // Llama al método genérico delete del servicio CRUD
+  update(id : string, partial : Partial<Seccion>) : Observable<Seccion> {
+    const url = `${this.base}/${this.collection}/${id}`;
+    const body = FirestoreMapear.seccionToFirestore( {
+      ...partial,
+      fechaActualizacion: new Date().toISOString()
+    } as Seccion);
+    
+    const fields = Object.keys((body as any).fields || {});
+    let params = new HttpParams();
+    fields.forEach(k => params = params.append('updateMask.fieldPaths', k));
+
+    return this.headers().pipe(
+      switchMap(headers =>
+        this.http.patch<any>(url, body, { headers, params }).pipe(
+          map(doc => FirestoreMapear.seccionFromFirestore(doc))
+        )
+      )
+    );
+  }
+
+  put(id : string, full : Seccion) : Observable<Seccion>{
+    return this.update(id, full);
+  }
+
+  delete(id : string) : Observable<void> {
+    const url = `${this.base}/${this.collection}/${id}`;
+    
+    return this.headers().pipe(
+      switchMap(headers => this.http.delete<void>(url, { headers }))
+    );
   }
 }

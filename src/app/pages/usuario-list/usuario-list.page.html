@@ -1,0 +1,54 @@
+<app-header></app-header>
+
+<ion-content class="ion-padding">
+  <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
+
+  <ion-searchbar
+    placeholder="Buscar usuario..."
+    [(ngModel)]="terminoBusqueda"
+    (ionInput)="filtrarUsuarios()"
+  ></ion-searchbar>
+
+  <ion-list *ngIf="!cargando && usuariosFiltrados.length > 0">
+    <ion-item *ngFor="let usuario of usuariosFiltrados">
+      <ion-label>
+        <h2>{{ usuario.firstName }} {{usuario.lastName}}</h2>
+        <!--<p>CI: {{ usuario.ci }} {{ usuario.complemento || '' }} {{ usuario.extension }}</p>
+        <p>Fecha de nacimiento: {{ usuario.fechaNacimiento | date:'dd/MM/yyyy' }}</p>
+        <p>Teléfono: {{ usuario.telefono }}</p>
+        <p>Email: {{ usuario.email }}</p>
+        <p>Fecha de creación: {{ usuario.fechaCreacion | date:'dd/MM/yyyy, hh:mm a' }}</p>
+        <p>Usuario: <strong>{{ usuario.username }}</strong></p>-->
+        <p>Rol: {{ usuario.rol || 'No asignado' }}</p>
+        <p>Estado: 
+          <ion-text [color]="usuario.estado === 'activo' ? 'success' : 'danger'">
+            {{ usuario.estado | uppercase }}
+          </ion-text>
+        </p>
+      </ion-label>
+
+      <ion-buttons slot="end">
+        <ion-button color="primary" [routerLink] = "['/usuario/detalle', usuario.id]">Ver</ion-button>
+        <ion-button color="warning" [routerLink] = "['/usuario/editar', usuario.id]">Editar</ion-button>
+        <ion-button color="danger" *ngIf="usuario.estado == 'activo'" (click)="eliminarLogicaUsuario(usuario)">Eliminar</ion-button>
+        <ion-button color="success" *ngIf="usuario.estado == 'inactivo'" (click)="activarUsuario(usuario)">Activar</ion-button>
+      </ion-buttons>
+    </ion-item>
+  </ion-list>
+
+  <ion-text color="danger" *ngIf="!cargando && usuariosFiltrados.length === 0">
+    No hay usuarios que coincidan con la búsqueda.
+  </ion-text>
+
+<ion-fab vertical="bottom" horizontal="end" slot="fixed">
+  <ion-fab-button color="primary" [routerLink]="['/usuario/nueva']">
+    <i class="fa-solid fa-plus fa-2x" style="color: white;"></i>
+  </ion-fab-button>
+</ion-fab>
+
+<ion-fab vertical="bottom" horizontal="start" slot="fixed">
+  <ion-fab-button color="primary" [routerLink]="['/inicio']">
+    <i class="fa-solid fa-hand-point-left fa-2x" style="color: white;"></i>
+  </ion-fab-button>
+</ion-fab>
+</ion-content>

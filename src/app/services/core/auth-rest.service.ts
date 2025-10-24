@@ -1,9 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, tap, map, from, catchError  } from 'rxjs';
+import { Observable, tap, map, from, catchError, switchMap, throwError  } from 'rxjs';
 import { AuthResponse } from 'src/app/models/auth-response.model';
 import { RefreshResponse } from 'src/app/models/refresh-response.model';
 import { environment } from 'src/environments/environment';
+import { UsuarioService } from '../collections/usuario.service';
+import { Injector } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'  // Disponible en toda la APP
@@ -14,26 +16,20 @@ export class AuthRestService {
   private userEmail? : string;
   private tokenExpirationTime?: number;
 
-  constructor(private http : HttpClient) {
+  constructor(private http: HttpClient, private injector: Injector) {
+    this.loadSession();
+  }
+
+  private loadSession() {
     const savedToken = localStorage.getItem('idToken');
     const savedRefresh = localStorage.getItem('refreshToken');
     const savedEmail = localStorage.getItem('userEmail');
     const savedExpiration = localStorage.getItem('tokenExpirationTime');
-    
-    if (savedToken && savedEmail) {
-      this.idToken = savedToken;
-      this.userEmail = savedEmail;
-    }
 
-    if (savedToken && savedEmail && savedRefresh) {
-      this.idToken = savedToken;
-      this.refreshToken = savedRefresh;
-      this.userEmail = savedEmail;
-    }
-
-    if (savedExpiration) {
-      this.tokenExpirationTime = parseInt(savedExpiration);
-    }
+    if (savedToken) this.idToken = savedToken;
+    if (savedRefresh) this.refreshToken = savedRefresh;
+    if (savedEmail) this.userEmail = savedEmail;
+    if (savedExpiration) this.tokenExpirationTime = parseInt(savedExpiration);
   }
 
   /* Devuelve un token válido (refresca si está vencido) */
@@ -46,15 +42,9 @@ export class AuthRestService {
       return from(Promise.resolve(this.idToken));
     } else if (this.refreshToken) {
       // Token expirado → refrescar
-      return this.refreshIdToken().pipe(
-        catchError(err => {
-          this.signOut(); // Limpiar sesión si refresh falla
-          return from(Promise.reject('No hay sesión activa'));
-        })
-      );
+      return this.refreshIdToken();
     } else {
-      // Sin sesión activa
-      return from(Promise.reject('No hay sesión activa'));
+      return throwError(() => new Error('No hay sesión activa'));
     }
   }
   
@@ -62,58 +52,8 @@ export class AuthRestService {
     return this.userEmail;
   }
 
-  signInEmailPassword(email : string, password : string) : Observable<string> {
-    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.firebase.apiKey}`;
-    return this.http.post<AuthResponse>(url, {
-      email, password, returnSecureToken: true
-    }).pipe(
-      tap(res => {
-        this.idToken = res.idToken;
-        this.refreshToken = res.refreshToken;
-        this.userEmail = res.email;
-
-        this.tokenExpirationTime = Date.now() + parseInt(res.expiresIn ?? '3600') * 1000;
-
-        // 👇 Guardar sesión en localStorage
-        localStorage.setItem('idToken', res.idToken);
-        localStorage.setItem('refreshToken', res.refreshToken);
-        localStorage.setItem('userEmail', res.email);
-        localStorage.setItem('tokenExpirationTime', this.tokenExpirationTime.toString());
-      }),
-      map(res => res.idToken)
-    );
-  }
-
-  /** Refrescar token si expiró */
-  private refreshIdToken(): Observable<string> {
-    const url = `https://securetoken.googleapis.com/v1/token?key=${environment.firebase.apiKey}`;
-
-    if (!this.refreshToken) {
-      this.signOut(); // limpiar tokens inválidos
-      return from(Promise.reject('No se puede refrescar: no hay refreshToken'));
-    }
-
-    return this.http.post<RefreshResponse>(url, {
-      grant_type: 'refresh_token',
-      refresh_token: this.refreshToken
-    }).pipe(
-      tap(res => {
-        this.idToken = res.id_token;
-        this.refreshToken = res.refresh_token;
-        this.tokenExpirationTime = Date.now() + parseInt(res.expires_in ?? '3600') * 1000;
-
-        localStorage.setItem('idToken', this.idToken);
-        localStorage.setItem('refreshToken', this.refreshToken);
-        localStorage.setItem('tokenExpirationTime', this.tokenExpirationTime.toString());
-      }),
-      map(res => res.id_token),
-
-    // Si el refresh falla, limpiar sesión
-    catchError(err => {
-      this.signOut();
-      return from(Promise.reject('Refresh token inválido, cierre de sesión'));
-    })
-    );
+  isLoggedIn(): boolean {
+    return !!this.idToken;
   }
 
   signOut(){
@@ -128,7 +68,64 @@ export class AuthRestService {
     localStorage.removeItem('tokenExpirationTime');
   }
 
-  isLoggedIn(): boolean {
-    return !!this.idToken;
+  signInEmailPassword(email : string, password : string) : Observable<string> {
+    const url = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.firebase.apiKey}`;
+    return this.http.post<AuthResponse>(url, {
+      email, password, returnSecureToken: true
+    }).pipe(
+      tap(res => this.saveSession(res.idToken, res.refreshToken, res.email, res.expiresIn)),
+      map(res => res.idToken)
+    );
+  }
+
+  signInUsernameOrEmail(usernameOrEmail: string, password: string): Observable<string> {
+
+    // Si es email válido → login directo
+    if(this.isEmail(usernameOrEmail)) {
+      return this.signInEmailPassword(usernameOrEmail, password);
+    }
+
+    // Carga perezosa para evitar circular dependency
+    const usuarioService = this.injector.get(UsuarioService);
+
+    // Si es username → buscar correo en Firestore
+    return usuarioService.getAll().pipe(
+      switchMap(users => {
+        const user = users.find(u => u.username?.toLowerCase() === usernameOrEmail.toLowerCase());
+        if (!user) return throwError(() => new Error('Usuario no encontrado'));
+        return this.signInEmailPassword(user.email, password);
+      })
+    );
+  }
+
+  private isEmail(value: string): boolean {
+    const re = /\S+@\S+\.\S+/;
+    return re.test(value);
+  }
+
+  private saveSession(idToken: string, refreshToken: string, email: string, expiresIn?: string) {
+    this.idToken = idToken;
+    this.refreshToken = refreshToken;
+    this.userEmail = email;
+    this.tokenExpirationTime = Date.now() + (parseInt(expiresIn ?? '3600') * 1000);
+
+    localStorage.setItem('idToken', idToken);
+    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('userEmail', email);
+    localStorage.setItem('tokenExpirationTime', this.tokenExpirationTime.toString());
+  }
+
+  /** Refrescar token si expiró */
+  private refreshIdToken(): Observable<string> {
+    const url = `https://securetoken.googleapis.com/v1/token?key=${environment.firebase.apiKey}`;
+    if (!this.refreshToken) return from(Promise.reject('No hay refreshToken'));
+    return this.http.post<RefreshResponse>(url, { grant_type: 'refresh_token', refresh_token: this.refreshToken }).pipe(
+      tap(res => this.saveSession(res.id_token, res.refresh_token, this.userEmail ?? '', res.expires_in)),
+      map(res => res.id_token),
+      catchError(err => {
+        this.signOut();
+        return from(Promise.reject('Refresh token inválido'));
+      })
+    );
   }
 }

@@ -38,16 +38,11 @@ export class EncuestaFormPage implements OnInit {
     private router: Router, //navegar entre vistas.
     private alertCtrl: AlertController, //mostrar mensajes al usuario.
     private encuestaState: EncuestaStateService
-
   ) { }
 
   ngOnInit() {
     this.id = this.route.snapshot.paramMap.get('id')!;
-    if (this.id) {
-      this.editMode = true;
-      this.encuestaService.getById(this.id).subscribe(data => this.encuesta = data);
-    }
-
+    
     if (this.id) {
       // Editar encuesta
       this.editMode = true;
@@ -83,7 +78,7 @@ export class EncuestaFormPage implements OnInit {
     }
 
     if (this.editMode) {
-      this.encuestaService.update(this.id,this.encuesta)
+      this.encuestaService.update(this.id, this.encuesta)
         .subscribe(() => this.volver());
     } else {
       this.encuestaService.create(this.encuesta)

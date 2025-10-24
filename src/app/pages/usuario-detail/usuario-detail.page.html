@@ -1,0 +1,25 @@
+<app-header></app-header>
+
+<ion-content class="ion-padding" *ngIf="usuario">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ usuario.firstName }} {{usuario.lastName}}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>CI: {{ usuario.ci }} {{ usuario.complemento || '' }} {{ usuario.extension }}</p>
+      <p>Fecha de nacimiento: {{ usuario.fechaNacimiento | date:'dd/MM/yyyy' }}</p>
+      <p>Teléfono: {{ usuario.telefono }}</p>
+      <p>Email: {{ usuario.email }}</p>
+      <p>Fecha de creación: {{ usuario.fechaCreacion | date:'dd/MM/yyyy, hh:mm a' }}</p>
+      <p>Usuario: <strong>{{ usuario.username }}</strong></p>
+      <p>Rol: {{ usuario.rol || 'No asignado' }}</p>
+      <p>Estado: 
+        <ion-text [color]="usuario.estado === 'activo' ? 'success' : 'danger'">
+          {{ usuario.estado | uppercase }}
+        </ion-text>
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button expand="block" [routerLink]="['/usuario-list']">Volver</ion-button>
+</ion-content>
