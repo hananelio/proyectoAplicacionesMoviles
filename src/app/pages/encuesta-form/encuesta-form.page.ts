@@ -1,19 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule, NgIf } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Encuesta } from 'src/app/models/encuesta.model';
 import { EncuestaService } from 'src/app/services/collections/encuesta.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule, AlertController } from '@ionic/angular'
 import { EncuestaStateService } from 'src/app/services/core/encuesta-state.service';
-
 @Component({
   selector: 'app-encuesta-form',
   templateUrl: './encuesta-form.page.html',
   styleUrls: ['./encuesta-form.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule, IonicModule
+    CommonModule, FormsModule, IonicModule,
+    ReactiveFormsModule
   ]
 })
 export class EncuestaFormPage implements OnInit {
@@ -82,7 +82,20 @@ export class EncuestaFormPage implements OnInit {
         .subscribe(() => this.volver());
     } else {
       this.encuestaService.create(this.encuesta)
-        .subscribe(() => this.volver());
+        .subscribe(enc => {
+          this.encuesta = enc;
+          this.id = enc.id;
+          this.volver()
+
+          /*const primeraSeccion: Seccion = {
+            titulo: 'Sección Nueva',
+            descripcion: '',
+            orden: 1,
+            preguntas: []
+          }
+          this.seccionService.create(this.id, primeraSeccion)
+            .subscribe (() => this.volver())*/
+        });
     }
   }
 

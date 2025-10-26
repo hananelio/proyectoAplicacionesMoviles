@@ -1,5 +1,5 @@
 import { Asignacion } from './asignacion.model';
-import { Seccion } from './seccion.model';
+import { Pregunta } from './pregunta.model';
 
 export interface Encuesta {
     id: string; // Identificador único de la encuesta
@@ -13,6 +13,6 @@ export interface Encuesta {
     estado: 'borrador' | 'publicada' | 'archivada';
 
     // Subcolecciones
-    secciones?: Seccion[];
+    preguntas?: Pregunta[];
     asignaciones?: Asignacion[];
 }

@@ -4,39 +4,24 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <ion-list>
-    <ion-item>
-      <ion-input
-        label="Título"
-        labelPlacement="floating"
-        [(ngModel)]="encuesta.titulo"
-        required>
-      </ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-textarea
-        label="Descripción"
-        labelPlacement="floating"
-        [(ngModel)]="encuesta.descripcion">
-      </ion-textarea>
-    </ion-item>
-
-    <!--<ion-item>
-      <ion-select
-        label="Estado"
-        labelPlacement="floating"
-        [(ngModel)]="encuesta.estado">
-        <ion-select-option value="borrador">Borrador</ion-select-option>
-        <ion-select-option value="publicada">Publicada</ion-select-option>
-        <ion-select-option value="archivada">Archivada</ion-select-option>
-      </ion-select>
-    </ion-item>-->
-  </ion-list>
-
-  <ion-button expand="block" color="success" (click)="guardar()">
-    {{ editMode ? 'Actualizar' : 'Guardar' }}
-  </ion-button>
+<ion-content fullscreen class="ion-padding">
+  <!-- Formulario de encuesta -->
+  <ion-card class="mb-3">
+    <ion-card-header>
+      <ion-card-title>Información de la Encuesta</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="stacked">Título</ion-label>
+        <ion-input [(ngModel)]="encuesta.titulo" required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="stacked">Descripción</ion-label>
+        <ion-textarea [(ngModel)]="encuesta.descripcion"></ion-textarea>
+      </ion-item>
+      <ion-button expand="block" color="success" class="mt-3" (click)="guardar()">
+        {{ editMode ? 'Actualizar' : 'Guardar' }}
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
 </ion-content>
-

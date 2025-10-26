@@ -12,23 +12,20 @@ export class FirestoreMapear {
         // Normaliza a formato YYYY-MM-DD (sin hora)
         return d.toISOString().split('T')[0];
     }
-
 /** Convierte string (YYYY-MM-DD o Date) a ISO con hora (para Firestore) */
     static toTimestamp(dateStr?: string | Date): string | undefined {
         if (!dateStr) return undefined;
         return new Date(dateStr).toISOString(); // ejemplo: "2025-10-23T18:12:00.000Z"
     }
-
     /** Convierte timestamp Firestore a ISO (con hora) */
     static fromTimestamp(timestamp?: string): string {
         return timestamp ?? '';
     }
-
     /** Convierte timestamp Firestore a solo fecha (YYYY-MM-DD) */
     static fromTimestampDateOnly(timestamp?: string): string {
         return timestamp ? timestamp.split('T')[0] : '';
     }
-
+    /** Emvía los datos de la Encuesta a Firestore */
     static encuestaToFirestore(e : Encuesta) {
         //const toTimestamp = (d : any) => new Date(d).toISOString();
         const fields : any = {
@@ -52,7 +49,7 @@ export class FirestoreMapear {
 
         return { fields };
     }
-
+    /** Recibe los datos de la Encuesta de Firestore */
     static encuestaFromFirestore(doc: any): Encuesta {
         const f = doc.fields ?? {};
         return {
@@ -66,11 +63,11 @@ export class FirestoreMapear {
             fechaPublicacion: this.fromTimestamp(f.fechaPublicacion?.timestampValue) ?? '',
             fechaCierre: this.fromTimestamp(f.fechaCierre?.timestampValue) ?? '',
             
-            secciones: [], // se llenará si haces otra petición a subcolección
+            preguntas: [], // se llenará si haces otra petición a subcolección
             asignaciones: [],
         }
     }
-
+    /** Envía los datos del Usuario a Firestore */
     static usuarioToFirestore(u: Usuario) {
         const fields: any = {
             uid: { stringValue: u.uid }, // <--- agrega esta línea
@@ -97,7 +94,7 @@ export class FirestoreMapear {
 
         return { fields };
     }
-
+    /** Recibe los datos del Usuario de Firestore */
     static usuarioFromFirestore(doc:any): Usuario {
         const f = doc.fields ?? {};
 
@@ -123,28 +120,6 @@ export class FirestoreMapear {
             password: f.password?.stringValue,
             rol: f.rol?.stringValue ?? 'encuestador',
             estado: f.estado?.stringValue ?? 'activo',
-        }
-    }
-
-    static seccionToFirestore(s : Seccion) {
-        const fields : any = {
-            titulo : { stringValue : s.titulo },
-            descripcion : { stringValue : s.descripcion ?? '' },
-            orden : { stringValue : s.orden }
-        };
-
-        return { fields };
-    }
-
-    static seccionFromFirestore(doc: any): Seccion {
-        const f = doc.fields ?? {};
-        return {
-            id: doc.name?.split('/').pop() ?? '',
-            titulo: f.titulo?.stringValue ?? '',
-            descripcion: f.descripcion?.stringValue ?? '',
-            orden: f.orden?.integerValue ?? 1,
-            
-            preguntas: [] // se llenará si haces otra petición a subcolección
         }
     }
 }

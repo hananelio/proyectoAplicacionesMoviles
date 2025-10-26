@@ -1,0 +1,32 @@
+.form-encuesta {
+  width: 100%;
+  max-width: 100%;
+  padding: 0 16px; /* opcional, margen interno */
+  box-sizing: border-box;
+}
+
+/* Grilla de secciones */
+.grid-secciones {
+  display: grid;
+  grid-template-columns: 1fr; /* 1 columna por defecto */
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .grid-secciones {
+    grid-template-columns: 1fr 1fr; /* 2 columnas en tablet/desktop */
+  }
+}
+
+@media (min-width: 1200px) {
+  .grid-secciones {
+    grid-template-columns: 1fr 1fr 1fr; /* 3 columnas en pantallas grandes */
+  }
+}
+
+/* Cada tarjeta app-seccion ocupa todo el ancho de su columna */
+.grid-secciones app-seccion {
+  width: 100%;
+max-width: 100%;
+  box-sizing: border-box;
+}
