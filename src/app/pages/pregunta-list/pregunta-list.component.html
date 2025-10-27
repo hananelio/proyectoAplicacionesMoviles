@@ -1,0 +1,22 @@
+<div
+  cdkDropList
+  [cdkDropListData]="preguntas"
+  (cdkDropListDropped)="drop($event)"
+  class = "pregunta-list"
+>
+  <div
+    *ngFor="let pregunta of preguntas; let i = index"
+    cdkDrag
+    class="pregunta-item"
+  >
+  <app-pregunta-item
+    [pregunta]="pregunta"
+    [editandoEncuesta]="editandoEncuesta"
+    [editandoTexto]="preguntaEditandoId === pregunta.id"
+    (agregarDebajo)="agregarPreguntaDebajo(i)"
+    (eliminar)="eliminarPregunta(pregunta)"
+    (salirEdicion)="desactivarEdicion.emit()"
+    (activarEdicion)="activarEdicion.emit($event)"
+  ></app-pregunta-item>
+  </div>
+</div>

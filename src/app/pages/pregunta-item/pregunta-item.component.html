@@ -1,0 +1,157 @@
+<ion-card class="pregunta-card">
+  <ion-card-header class="header-flex">
+    <div class="titulo">
+      <!-- Título -->
+      <ion-input
+        *ngIf="editandoTexto"
+        [(ngModel)]="pregunta.texto"
+        (blur)="guardarTexto()"
+        (keydown.enter)="guardarTexto()"
+        autofocus
+        class="editable-input">
+      </ion-input>
+
+      <ion-card-title
+        *ngIf="!editandoTexto"
+        class="editable-titulo"
+        (click)="toggleTexto()">
+        {{ pregunta.texto }}
+      </ion-card-title>
+
+      <!-- Tipo -->
+      <ion-card-subtitle
+        *ngIf="!editandoTipo"
+        class="editable-tipo"
+        (click)="toggleTipo()">
+        {{ pregunta.tipo | uppercase }}
+      </ion-card-subtitle>
+
+      <ion-select
+        *ngIf="editandoTipo"
+        [(ngModel)]="pregunta.tipo"
+        (ionChange)="guardarTipo()"
+        interface="popover"
+        class="editable-select">
+        <ion-select-option *ngFor="let t of tiposPregunta" [value]="t">
+          {{ t | uppercase }}
+        </ion-select-option>
+      </ion-select>
+    </div>
+
+    <!-- Acciones -->
+    <div class="acciones">
+      <ion-button fill="clear" color="medium" size="small" (click)="toggleTexto()">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </ion-button>
+      <ion-button fill="clear" color="danger" size="small" (click)="eliminarPregunta()">
+        <i class="fa-solid fa-trash"></i>
+      </ion-button>
+    </div>
+  </ion-card-header>
+
+  <ion-card-content>
+    <ng-container [ngSwitch]="pregunta.tipo">
+      
+      <!-- Texto -->
+      <ion-input *ngSwitchCase="'texto'" placeholder="Respuesta..."></ion-input>
+
+      <!-- Opción múltiple -->
+      <ion-radio-group *ngSwitchCase="'opcion_multiple'" [(ngModel)]="pregunta.respuesta" (ionChange)="onSeleccionarRespuesta($event.detail.value)">
+        <ion-item *ngFor="let op of pregunta.opciones">
+          <ion-label>{{ op }}</ion-label>
+          <ion-radio slot="start" [value]="op"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
+
+      <!-- Checkbox -->
+      <ng-container *ngSwitchCase="'checkbox'">
+        <ion-item *ngFor="let op of pregunta.opciones">
+          <ion-checkbox slot="start"></ion-checkbox>
+          <ion-label>{{ op }}</ion-label>
+        </ion-item>
+      </ng-container>
+
+      <!-- Escala -->
+      <div *ngSwitchCase="'escala'" class="escala-container">
+        <!-- MODO EDICIÓN: mantiene tus selectores y etiquetas -->
+        <div *ngIf="!editandoEncuesta" class="rango-edicion">
+          <!-- Rango -->
+          <div class="rango-flex">
+            <!--Valor mínimo-->
+            <span>De</span>
+            <ion-select
+              [(ngModel)]="pregunta.valorMin"
+              (ionChange)="actualizarEscala()"
+              interface="popover"
+              [disabled]="editandoEncuesta"
+            >
+              <ion-select-option *ngFor="let n of [0,1]" [value]="n">{{ n }}</ion-select-option>
+            </ion-select>
+            <!--<span *ngFor="let n of escala">{{ n }}</span>-->
+            
+            <!--Valor mínimo-->
+            <span>a</span>
+            <ion-select
+              [(ngModel)]="pregunta.valorMax"
+              (ionChange)="actualizarEscala()"
+              interface="popover"
+              [disabled]="editandoEncuesta"
+            >
+              <ion-select-option *ngFor="let n of [2,3,4,5,6,7,8,9,10]" [value]="n">{{ n }}</ion-select-option>
+            </ion-select>
+          </div>
+
+          <!-- Etiquetas -->
+          <div class="etiquetas-flex">
+            <!-- Etiqueta valor mínimo -->
+            <div class="etiqueta-item">
+              <span>{{ pregunta.valorMin }}</span>
+                <ion-input
+                  [(ngModel)]="pregunta.etiquetaInicio"
+                  placeholder="Etiqueta izquierda"
+                  (ionBlur)="actualizarEtiquetas()">
+                </ion-input>
+            </div>
+            <!-- Etiqueta valor máximo -->
+            <div class="etiqueta-item">
+              <span>{{ pregunta.valorMax }}</span>
+              <ion-input
+                [(ngModel)]="pregunta.etiquetaFin"
+                placeholder="Etiqueta derecha"
+                (ionBlur)="actualizarEtiquetas()">
+              </ion-input>
+            </div>
+          </div>
+          
+          <ion-item lines="none">
+            <ion-label>Obligatorio</ion-label>
+            <ion-toggle [(ngModel)]="pregunta.obligatorio" (ionChange)="actualizarCampo({ obligatorio: pregunta.obligatorio })"></ion-toggle>
+          </ion-item>
+        </div>
+        <!-- MODO VISTA / APLICACIÓN: estilo Google Forms -->
+        <div *ngIf="editandoEncuesta" class="rango-visual">
+          <ion-radio-group [(ngModel)]="pregunta.respuesta">
+            <div class="radio-flex">
+              <ion-item lines="none" *ngFor="let n of escala">
+                <ion-radio slot="start" [value]="n"></ion-radio>
+                <ion-label>{{ n }}</ion-label>
+              </ion-item>
+            </div>
+          </ion-radio-group>
+
+          <div class="etiquetas-flex">
+            <span>{{ pregunta.etiquetaInicio }}</span>
+            <span>{{ pregunta.etiquetaFin }}</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ion-card-content>
+
+  <ion-card-content class="add-btn-container">
+    <ion-button expand="block" fill="outline" size="small" (click)="agregarDebajo.emit()">
+      <i slot="start" class="fa-solid fa-circle-plus"></i>
+      Agregar pregunta debajo
+    </ion-button>
+  </ion-card-content>
+</ion-card>

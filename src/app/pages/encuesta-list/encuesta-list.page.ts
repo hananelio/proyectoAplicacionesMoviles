@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController } from '@ionic/angular'
@@ -21,6 +21,9 @@ import { Subscription } from 'rxjs';
 ]
 })
 export class EncuestaListPage implements OnInit, OnDestroy {
+  @Input() preguntaEditandoId: string | null = null;  // <-- aquí
+  @Output() activarEdicion = new EventEmitter<string>();
+  @Output() desactivarEdicion = new EventEmitter<void>();
 
   encuestas : Encuesta[] = [];
   cargando = true;

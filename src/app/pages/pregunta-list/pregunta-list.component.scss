@@ -1,0 +1,14 @@
+.pregunta-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px;
+}
+
+.pregunta-item {
+    cursor: grab;
+}
+
+.pregunta-item:active {
+    cursor: grabbing;
+}

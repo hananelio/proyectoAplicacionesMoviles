@@ -103,7 +103,8 @@ export class HomePage { //FormLoginComponent
     this.authentication.signInUsernameOrEmail(usernameOrEmail, password).subscribe({
       next: token => {
         console.log('Token recibido:', token.slice(0, 20) + '...');
-        console.log('📦 LocalStorage:', localStorage.getItem('idToken'));
+        const localToken = localStorage.getItem('idToken');
+        console.log('📦 LocalStorage:', localToken ? localToken.slice(0,20) + '...': '(sin token');
         this.router.navigateByUrl('/inicio', { replaceUrl: true });
       },
       error: (err) => {

@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule, NgIf } from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Encuesta } from 'src/app/models/encuesta.model';
 import { EncuestaService } from 'src/app/services/collections/encuesta.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IonicModule, AlertController } from '@ionic/angular'
 import { EncuestaStateService } from 'src/app/services/core/encuesta-state.service';
+import { PreguntaListComponent } from '../pregunta-list/pregunta-list.component';
+import { Pregunta } from 'src/app/models/pregunta.model';
+import { PreguntaService } from 'src/app/services/collections/pregunta.service';
 @Component({
   selector: 'app-encuesta-form',
   templateUrl: './encuesta-form.page.html',
@@ -13,7 +16,7 @@ import { EncuestaStateService } from 'src/app/services/core/encuesta-state.servi
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonicModule,
-    ReactiveFormsModule
+    ReactiveFormsModule, PreguntaListComponent
   ]
 })
 export class EncuestaFormPage implements OnInit {
@@ -31,15 +34,19 @@ export class EncuestaFormPage implements OnInit {
 
   editMode = false; //indica si el formulario está en modo edición o creación.
   id!: string; //almacena el parámetro id obtenido desde la URL (/encuesta/editar/:i
+  preguntas: Pregunta[] = [];
+  preguntaEditandoId: string | null = null;
+  @Input() editandoEncuesta: boolean = false;
 
   constructor( // Inyecta servicios que el componente necesita
     private encuestaService: EncuestaService, //acceder, crear o editar encuestas.
+    private preguntaService: PreguntaService,
     private route: ActivatedRoute, //leer el parámetro id de la ruta.
     private router: Router, //navegar entre vistas.
     private alertCtrl: AlertController, //mostrar mensajes al usuario.
     private encuestaState: EncuestaStateService
   ) { }
-
+  //**coloca en el ciclo de vida la encuesta */
   ngOnInit() {
     this.id = this.route.snapshot.paramMap.get('id')!;
     
@@ -48,6 +55,12 @@ export class EncuestaFormPage implements OnInit {
       this.editMode = true;
       this.encuestaService.getById(this.id)
         .subscribe(data => this.encuesta = data);
+
+        // Cargar preguntas asociadas
+        this.preguntaService.getAll(this.id)
+          .subscribe( pregs => {
+            this.preguntas = pregs.sort((a,b) => a.orden - b.orden);
+        })
     } else {
       // Crear nueva encuesta → reiniciar los campos
       this.editMode = false;
@@ -64,7 +77,7 @@ export class EncuestaFormPage implements OnInit {
       };
     }
   }
-
+  /**Permite guardar la encuesta */
   async guardar() {
 
     if(!this.encuesta.titulo || this.encuesta.titulo.trim() === '') {
@@ -86,15 +99,6 @@ export class EncuestaFormPage implements OnInit {
           this.encuesta = enc;
           this.id = enc.id;
           this.volver()
-
-          /*const primeraSeccion: Seccion = {
-            titulo: 'Sección Nueva',
-            descripcion: '',
-            orden: 1,
-            preguntas: []
-          }
-          this.seccionService.create(this.id, primeraSeccion)
-            .subscribe (() => this.volver())*/
         });
     }
   }
@@ -108,5 +112,42 @@ export class EncuestaFormPage implements OnInit {
     await alert.present();
     this.encuestaState.refrescar();
     this.router.navigate(['/encuesta-list'])
+  }
+
+  /**Permite agregar preguntas al final */
+  agregarPreguntaFinal() {
+    if(!this.id) return; // Solo agregar si la encuesta ya tiene id
+    
+    const nueva: Pregunta = {
+      idEncuesta: this.id,
+      texto: 'Nueva pregunta',
+      tipo: 'texto',
+      obligatorio: false,
+      orden: this.preguntas.length + 1
+    };
+
+    this.preguntas.push(nueva);
+
+    this.preguntaService.create(nueva).subscribe(resp => {
+      if(resp?.id) nueva.id = resp.id;
+    });
+  }
+  /**Permite guardar/actualizar preguntas al final */
+  guardarPregunta() {
+    this.preguntas.forEach(p => {
+      if(p.id) {
+        this.preguntaService.update(this.id, p.id, p).subscribe();
+      } else {
+        this.preguntaService.create(p).subscribe(resp => p.id = resp.id)
+      }
+    })
+  }
+
+  activarEdicion(idPregunta: string) {
+    this.preguntaEditandoId = idPregunta;
+  }
+
+  desactivarEdicion() {
+    this.preguntaEditandoId = null;
   }
 }

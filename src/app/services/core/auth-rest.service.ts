@@ -32,12 +32,11 @@ export class AuthRestService {
     if (savedExpiration) this.tokenExpirationTime = parseInt(savedExpiration);
   }
 
-  /* Devuelve un token válido (refresca si está vencido) */
+  /**Devuelve un token válido (refresca si está vencido) */
   getToken(): Observable<string> {
-    //const expiration = localStorage.getItem('tokenExpirationTime');
     const now = Date.now();
 
-    if (this.idToken && this.tokenExpirationTime && now < this.tokenExpirationTime /*parseInt(expiration)*/) {
+    if (this.idToken && this.tokenExpirationTime && now < this.tokenExpirationTime) {
       // Token válido
       return from(Promise.resolve(this.idToken));
     } else if (this.refreshToken) {

@@ -1,6 +1,6 @@
 import { Encuesta } from '../../models/encuesta.model';
 import { DateTime } from 'luxon';
-import { Seccion } from 'src/app/models/seccion.model';
+import { Pregunta } from 'src/app/models/pregunta.model';
 import { Usuario } from 'src/app/models/usuario.model';
 
 export class FirestoreMapear {
@@ -120,6 +120,34 @@ export class FirestoreMapear {
             password: f.password?.stringValue,
             rol: f.rol?.stringValue ?? 'encuestador',
             estado: f.estado?.stringValue ?? 'activo',
+        }
+    }
+    /**Envía los datos de la Pregunta a Firestore */
+    static preguntaToFirestore(p: Pregunta) {
+        const fields: any = {
+            idEncuesta: { stringValue: p.idEncuesta },
+            texto: { stringValue: p.texto },
+            seccion: { stringValue: p.seccion ?? '' },
+            tipo: { stringValue: p.tipo },
+            opciones: { arrayValue: { values: (p.opciones ?? []).map(v => ({ stringValue: v })) } },
+            obligatorio: { booleanValue: p.obligatorio },
+            orden: { integerValue: p.orden }
+            //orden: { integerValue: String(p.orden ?? 1) }
+        };
+        return { fields };
+    }
+    /**Recibe los datos del Usuario de Firestore */
+    static preguntaFromFirestore (doc: any): Pregunta {
+        const f = doc.fields ?? {};
+        return {
+            id: doc.name?.split('/').pop(),
+            idEncuesta: f.idEncuesta.stringValue,
+            texto: f.texto?.stringValue,
+            seccion: f.seccion?.stringValue,
+            tipo: f.tipo?.stringValue,
+            opciones: f.opciones?.arrayValue?.values?.map((v: any) => v.stringValue) ?? [],
+            obligatorio: f.obligatorio?.booleanValue,
+            orden: f.orden?.integerValue
         }
     }
 }

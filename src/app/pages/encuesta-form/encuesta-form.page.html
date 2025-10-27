@@ -24,4 +24,27 @@
       </ion-button>
     </ion-card-content>
   </ion-card>
+
+  <!-- Lista de preguntas -->
+  <ion-card class="mb-3" *ngIf="id">
+    <ion-card-header>
+      <ion-card-title>Preguntas</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <app-pregunta-list 
+        [(preguntas)]="preguntas"
+        [preguntaEditandoId]="preguntaEditandoId"
+        (activarEdicion)="activarEdicion($event)"
+        (desactivarEdicion)="desactivarEdicion()">
+      ></app-pregunta-list>
+
+      <div class="ion-text-center" style="margin-top: 10px;">
+        <ion-button color="success" (click)="agregarPreguntaFinal()">
+          <i class="fa-solid fa-circle-plus"></i>
+          Agregar pregunta
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
 </ion-content>
