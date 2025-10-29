@@ -33,13 +33,6 @@ export class FirestoreMapear {
             creadorId : { stringValue : e.creadorId },
             estado : { stringValue : e.estado },
             descripcion : { stringValue : e.descripcion ?? '' },
-            //if (e.fechaCreacion) fields.fechaCreacion = { timestampValue : e.fechaCreacion };
-            //if (e.fechaCreacion) fields.fechaCreacion = { timestampValue : this.toTimestamp(e.fechaCreacion) ?? '' }
-
-            /*fechaCreacion: { timestampValue: this.toTimestamp(e.fechaCreacion)! },
-            fechaActualizacion: { timestampValue: this.toTimestamp(e.fechaActualizacion ?? e.fechaCreacion)! },
-            fechaPublicacion: { timestampValue: e.fechaPublicacion ? this.toTimestamp(e.fechaPublicacion)! : null },
-            fechaCierre: { timestampValue: e.fechaCierre ? this.toTimestamp(e.fechaCierre)! : null }*/
         };
 
         if (e.fechaCreacion) fields.fechaCreacion = { timestampValue: this.toTimestamp(e.fechaCreacion) };
@@ -129,11 +122,35 @@ export class FirestoreMapear {
             texto: { stringValue: p.texto },
             seccion: { stringValue: p.seccion ?? '' },
             tipo: { stringValue: p.tipo },
-            opciones: { arrayValue: { values: (p.opciones ?? []).map(v => ({ stringValue: v })) } },
-            obligatorio: { booleanValue: p.obligatorio },
             orden: { integerValue: p.orden }
-            //orden: { integerValue: String(p.orden ?? 1) }
         };
+
+        if (p.obligatorio !== undefined)
+            fields.obligatorio = { booleanValue: p.obligatorio };
+        // Opciones posibles
+        fields.opciones = {
+            arrayValue: {
+                values: p.opciones.map(op => {
+                const fieldsOpcion: any = {
+                    valor: { stringValue: op.valor }
+                };
+                if (op.esOtro !== undefined) {
+                    fieldsOpcion.esOtro = { booleanValue: op.esOtro };
+                }
+                return { mapValue: { fields: fieldsOpcion } };
+                })
+            }
+        };
+
+        
+        // Escala
+        if (p.valorMin !== undefined)
+            fields.valorMin = { integerValue: p.valorMin.toString() }; //String(p.valorMin)
+        if (p.valorMax !== undefined)
+            fields.valorMax = { integerValue: p.valorMax.toString() }; //String(p.valorMax)
+        if (p.etiquetaInicio) fields.etiquetaInicio = { stringValue: p.etiquetaInicio };
+        if (p.etiquetaFin) fields.etiquetaFin = { stringValue: p.etiquetaFin };
+
         return { fields };
     }
     /**Recibe los datos del Usuario de Firestore */
@@ -145,9 +162,26 @@ export class FirestoreMapear {
             texto: f.texto?.stringValue,
             seccion: f.seccion?.stringValue,
             tipo: f.tipo?.stringValue,
-            opciones: f.opciones?.arrayValue?.values?.map((v: any) => v.stringValue) ?? [],
+            opciones: f.opciones?.arrayValue?.values?.map((v: any) => ({
+                valor: v.mapValue.fields.valor.stringValue,
+                esOtro: v.mapValue.fields.esOtro?.booleanValue
+            })) ?? [],
             obligatorio: f.obligatorio?.booleanValue,
-            orden: f.orden?.integerValue
+            orden: f.orden?.integerValue,
+
+            // 🔹 Agregar lectura de etiquetas
+            valorMin: f.valorMin
+                ? Number(f.valorMin.integerValue ?? f.valorMin.stringValue)//(f.valorMin.integerValue)
+                : undefined,
+            valorMax: f.valorMax
+                ? Number(f.valorMax.integerValue ?? f.valorMax.stringValue)//(f.valorMax.integerValue)
+                : undefined,
+            etiquetaInicio: f.etiquetaInicio?.stringValue ?? '',
+            etiquetaFin: f.etiquetaFin?.stringValue ?? '',
+
+            // Inicializar respuestas vacías para checkbox / opción múltiple
+            respuestas: [] // se llenará desde la subcolección "Respuesta"
+            
         }
     }
 }

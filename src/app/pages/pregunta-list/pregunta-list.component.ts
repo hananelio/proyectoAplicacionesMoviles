@@ -6,7 +6,7 @@ import { PreguntaItemComponent } from "../pregunta-item/pregunta-item.component"
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { IonicModule } from '@ionic/angular'
 import { CommonModule } from '@angular/common';
-
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-pregunta-list',
@@ -26,6 +26,14 @@ export class PreguntaListComponent  {
   @Output() activarEdicion = new EventEmitter<string>();
   @Output() desactivarEdicion = new EventEmitter<void>();
 
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const clickedInside = (event.target as HTMLElement).closest('app-pregunta-item');
+    if (!clickedInside) {
+      this.preguntaEditandoId = null;
+    }
+  }
+
   constructor(private preguntaService: PreguntaService) { }
 
   drop(event: CdkDragDrop<Pregunta[]>) {
@@ -40,6 +48,7 @@ export class PreguntaListComponent  {
       idEncuesta,
       texto: 'Nueva pregunta',
       tipo: 'texto',
+      opciones: [],
       obligatorio: false,
       orden: index + 1
     };
@@ -62,4 +71,12 @@ export class PreguntaListComponent  {
       this.preguntaService.delete(pregunta.idEncuesta, pregunta.id).subscribe();
     }
   }
+
+  /*activarEdicion(id: string) {
+    this.preguntaEditandoId = id;
+  }
+
+  desactivarEdicion() {
+    this.preguntaEditandoId = null;
+  }*/
 }

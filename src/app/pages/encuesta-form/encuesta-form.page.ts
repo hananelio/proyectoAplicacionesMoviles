@@ -9,6 +9,8 @@ import { EncuestaStateService } from 'src/app/services/core/encuesta-state.servi
 import { PreguntaListComponent } from '../pregunta-list/pregunta-list.component';
 import { Pregunta } from 'src/app/models/pregunta.model';
 import { PreguntaService } from 'src/app/services/collections/pregunta.service';
+import { Respuesta } from 'src/app/models/respuesta.model';
+import { RespuestaService } from 'src/app/services/collections/respuesta.service';
 @Component({
   selector: 'app-encuesta-form',
   templateUrl: './encuesta-form.page.html',
@@ -37,10 +39,12 @@ export class EncuestaFormPage implements OnInit {
   preguntas: Pregunta[] = [];
   preguntaEditandoId: string | null = null;
   @Input() editandoEncuesta: boolean = false;
+  usuario: any;
 
   constructor( // Inyecta servicios que el componente necesita
     private encuestaService: EncuestaService, //acceder, crear o editar encuestas.
     private preguntaService: PreguntaService,
+    private respuestaService: RespuestaService,
     private route: ActivatedRoute, //leer el parámetro id de la ruta.
     private router: Router, //navegar entre vistas.
     private alertCtrl: AlertController, //mostrar mensajes al usuario.
@@ -122,6 +126,7 @@ export class EncuestaFormPage implements OnInit {
       idEncuesta: this.id,
       texto: 'Nueva pregunta',
       tipo: 'texto',
+      opciones: [],
       obligatorio: false,
       orden: this.preguntas.length + 1
     };
@@ -150,4 +155,16 @@ export class EncuestaFormPage implements OnInit {
   desactivarEdicion() {
     this.preguntaEditandoId = null;
   }
+
+onRespuestaSeleccionada(event: { idPregunta: string, valor: any }) {
+  const nuevaRespuesta: Respuesta = {
+    idPregunta: event.idPregunta,
+    idUsuario: this.usuario.id,
+    respuestas: { valor: event.valor }, // o más campos si quieres
+    fechaEnvio: new Date(),
+    estado: 'borrador'
+  };
+
+  this.respuestaService.guardarRespuesta(nuevaRespuesta);
+}
 }

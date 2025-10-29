@@ -15,8 +15,8 @@
     [editandoTexto]="preguntaEditandoId === pregunta.id"
     (agregarDebajo)="agregarPreguntaDebajo(i)"
     (eliminar)="eliminarPregunta(pregunta)"
-    (salirEdicion)="desactivarEdicion.emit()"
     (activarEdicion)="activarEdicion.emit($event)"
+    (salirEdicion)="desactivarEdicion.emit()"
   ></app-pregunta-item>
   </div>
 </div>

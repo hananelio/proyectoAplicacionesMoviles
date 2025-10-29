@@ -32,10 +32,11 @@
     </ion-card-header>
     <ion-card-content>
       <app-pregunta-list 
-        [(preguntas)]="preguntas"
-        [preguntaEditandoId]="preguntaEditandoId"
-        (activarEdicion)="activarEdicion($event)"
-        (desactivarEdicion)="desactivarEdicion()">
+      [preguntas]="preguntas"
+      [editandoEncuesta]="editandoEncuesta"
+      [preguntaEditandoId]="preguntaEditandoId"
+      (activarEdicion)="preguntaEditandoId = $event"
+      (desactivarEdicion)="preguntaEditandoId = null"
       ></app-pregunta-list>
 
       <div class="ion-text-center" style="margin-top: 10px;">

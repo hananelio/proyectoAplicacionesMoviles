@@ -2,10 +2,10 @@
   position: relative;
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease-in-out;
   margin-bottom: 14px;
   background: var(--ion-card-background, #fff);
   cursor: grab;
+  transition: all 0.3s ease-in-out;
 
   &:hover {
     transform: translateY(-2px);
@@ -13,7 +13,7 @@
 
     .add-btn-container {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(-50%) translateY(0);
       pointer-events: all;
     }
   }
@@ -61,7 +61,7 @@
 
     .acciones {
       display: flex;
-      gap: 4px;
+      gap: 6px;
 
       ion-button {
         --padding-start: 4px;
@@ -103,47 +103,112 @@
   }
 }
 
+/* ================= ESCALA ================= */
 .escala-container {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+.rango-edicion {
+  display: flex;
+  flex-direction: column;
   gap: 10px;
+
+  .rango-flex {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    ion-select {
+      width: 60px;
+    }
+  }
+
+  .etiquetas-flex {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+
+    .etiqueta-item {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      ion-input {
+        flex: 1;
+      }
+    }
+  }
+
+  ion-item {
+    margin-top: 6px;
+  }
 }
 
-.rango-flex {
+/* Modo visual / aplicación */
+.rango-visual {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
+
+  ion-radio-group {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+  }
+
+  ion-radio {
+    --size: 24px;
+    --border-width: 2px;
+    --border-color: #007aff;
+    --checked-color: #007aff;
+  }
+
+  .etiquetas-flex {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #555;
+  }
+}
+
+.escala-horizontal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.escala-opciones {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 1rem; /* Espacio entre opciones */
+  flex-wrap: wrap; /* por si hay muchas opciones */
+}
+
+.opcion-horizontal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  --inner-padding-end: 0;
+  --inner-padding-start: 0;
+  --min-height: 0;
+}
+
+.opcion-horizontal ion-radio {
+  margin-bottom: 4px;
 }
 
 .etiquetas-flex {
   display: flex;
   justify-content: space-between;
-  gap: 20px;
-}
-
-.etiqueta-item {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.etiqueta-item ion-input {
-  flex: 1;
-}
-
-.radio-flex {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 10px;
-}
-
-.etiquetas-flex {
-  display: flex;
-  justify-content: space-between;
+  width: 100%;
+  margin-top: 8px;
   font-size: 0.9rem;
-  margin-top: 5px;
 }
-
-
-

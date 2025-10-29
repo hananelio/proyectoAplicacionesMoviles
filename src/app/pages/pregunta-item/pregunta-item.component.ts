@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ElementRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges, HostListener } from '@angular/core';
 import { Pregunta } from 'src/app/models/pregunta.model';
 import { PreguntaService } from 'src/app/services/collections/pregunta.service';
 import { CommonModule, NgIf } from '@angular/common';
@@ -15,18 +15,25 @@ import { HttpClient } from '@angular/common/http';
     CommonModule, IonicModule, FormsModule, ReactiveFormsModule
 ]
 })
-export class PreguntaItemComponent {
+export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
   @Input() pregunta!: Pregunta;
-  @Output() agregarDebajo = new EventEmitter<void>();
-  @Output() activarEdicion = new EventEmitter<string>();
-  @Output() eliminar = new EventEmitter<Pregunta>();
-  @Input() editandoEncuesta: boolean = false; // true si la encuesta está en edición general
-  @Output() salirEdicion = new EventEmitter<void>();
-  @Input() editandoTexto: boolean = false;
 
-  editandoTipo = false;
+  @Input() editandoEncuesta: boolean = true;
+  @Input() editandoTexto: boolean = false;
+  @Input() editandoTipo: boolean = false;
+
+  @Output() agregarDebajo = new EventEmitter<void>();
+  @Output() eliminar = new EventEmitter<Pregunta>();
+  @Output() activarEdicion = new EventEmitter<string>();
+  @Output() salirEdicion = new EventEmitter<void>();
+
+  @Output() respuestaSeleccionada = new EventEmitter<{ idPregunta: string, valor: any }>();
+  selecciones = new Set<string>(); // Para almacenar temporalmente las opciones seleccionadas en checkbox
+  @HostListener('document:click', ['$event'])
+
   escala: number[] = [];
   private clickListener!: any;
+  private etiquetaTimeout: any;
 
   tiposPregunta = ['texto', 'opcion_multiple', 'checkbox', 'escala'];
 
@@ -37,16 +44,58 @@ export class PreguntaItemComponent {
   ) {}
 
   ngOnInit() {
+    // Asegura que siempre exista la pregunta y la propiedad respuestasMarcadas
+    if (!this.pregunta) {
+      this.pregunta = {} as Pregunta;
+    }
+
+    if (!this.pregunta.opciones) {
+      this.pregunta.opciones = [];
+    }
+
+    if (!this.pregunta.respuestasMarcadas) {
+      this.pregunta.respuestasMarcadas = {};
+    }
+
+    this.pregunta.respuestasMarcadas = this.pregunta.respuestasMarcadas || {};
+    
+    // 🧩 Asegurar estructura de pregunta para evitar undefined
+    if (!this.pregunta.opciones) {
+      this.pregunta.opciones = [];
+    }
+
+    if (!(this.pregunta as any).respuestasMarcadas) {
+      (this.pregunta as any).respuestasMarcadas = {};
+    }
     // Detectar clic fuera del componente
     this.clickListener = (event: Event) => {
-      //if (this.editandoTexto && !this.el.nativeElement.contains(event.target))
-      if (!this.el.nativeElement.contains(event.target)) {
+      if (!this.el.nativeElement.contains(event.target) && (this.editandoTexto || this.editandoTipo)) {
         this.editandoTexto = false;
         this.editandoTipo = false;
         this.salirEdicion.emit();
       }
-    };
+    }
     document.addEventListener('click', this.clickListener);
+  }
+  
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['pregunta'] && this.pregunta) {
+      // normaliza por si viene como string u undefined
+      this.pregunta.valorMin = Number(this.pregunta.valorMin) || 1;
+      this.pregunta.valorMax = Number(this.pregunta.valorMax) || 5;
+      // genera la escala para visualizar
+      this.generarEscala();
+
+      // debug temporal
+      console.log('[PreguntaItem] carga pregunta:', {
+        id: this.pregunta.id,
+        valorMin: this.pregunta.valorMin,
+        valorMax: this.pregunta.valorMax,
+        etiquetaInicio: this.pregunta.etiquetaInicio,
+        etiquetaFin: this.pregunta.etiquetaFin,
+        escala: this.escala
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -54,159 +103,170 @@ export class PreguntaItemComponent {
     document.removeEventListener('click', this.clickListener);
   }
 
-  borrarSeleccion() {
-    this.pregunta.respuesta = null;
+  /* ======== ESCALA ======== */
+  // Rangos para edición
+  get rangoMin(): number[] {
+    //return Array.from({ length: 11 }, (_, i) => i); // 0 a 10
+    return Array.from({ length: 2 }, (_, i) => i); // 0 a 10
+  }
+
+  get rangoMax(): number[] {
+    //return Array.from({ length: 11 }, (_, i) => i); // 0 a 10
+    return Array.from({ length: 9 }, (_, i) => i + 2); // 0 a 10
+  }
+
+  // Genera escala para visualización
+  /*generarEscala() {
+    const inicio = Number(this.pregunta.valorMin) || 1;
+    const fin = Number(this.pregunta.valorMax) || 5;
+
+    this.escala = Array.from({ length: fin - inicio + 1 }, (_, i) => i + inicio);
+  }*/
+  generarEscala() {
+    if (this.pregunta.valorMin !== undefined && this.pregunta.valorMax !== undefined) {
+      this.escala = Array.from(
+        { length: this.pregunta.valorMax - this.pregunta.valorMin + 1 },
+        (_, i) => i + this.pregunta.valorMin!
+      );
+    } else {
+      this.escala = [];
+    }
+  }
+
+  actualizarEscala() {
+    this.generarEscala();
+    this.actualizarCampo({ valorMin: this.pregunta.valorMin, valorMax: this.pregunta.valorMax });
+  }
+
+  /* ======== EDICIÓN ======== */
+  /** Toggle edición de texto */
+  toggleTexto(event?: Event) {
+    if (event) event.stopPropagation(); // evita que el listener cierre
+    this.editandoTexto = true;
+    this.editandoTipo = false;
+    this.activarEdicion.emit(this.pregunta.id);
+  }
+
+  /** Toggle edición de tipo */
+  toggleTipo(event?: Event) {
+    //if (!this.editandoEncuesta) return;
+    if (event) event.stopPropagation();
+    this.editandoTipo = true;
+    this.editandoTexto = false;
   }
 
   /** Guardar texto editado */
   guardarTexto() {
-    if (!this.editandoEncuesta) return;
     this.editandoTexto = false;
-
-    if(this.pregunta?.id && this.pregunta?.idEncuesta) {
-      this.preguntaService.update(
-        this.pregunta.idEncuesta,
-        this.pregunta.id,
-        { texto: this.pregunta.texto }
-      ).subscribe();
-    }
+    this.actualizarCampo({ texto: this.pregunta.texto });
   }
 
   /** Guardar tipo editado */
   guardarTipo() {
-    if (!this.editandoEncuesta) return;
     this.editandoTipo = false;
+    this.actualizarCampo({ tipo: this.pregunta.tipo });
 
-    if(this.pregunta?.id && this.pregunta?.idEncuesta) {
-      this.preguntaService.update(
-        this.pregunta.idEncuesta,
-        this.pregunta.id,
-        { tipo: this.pregunta.tipo }
-      ).subscribe();
+    if ((this.pregunta.tipo === 'opcion_multiple' || this.pregunta.tipo === 'checkbox') && (!this.pregunta.opciones || this.pregunta.opciones.length === 0)) {
+      this.pregunta.opciones = [{ valor: 'Opción 1' }]; // agrega una opción vacía
     }
-  }
-
-  /** Toggle edición de texto */
-  toggleTexto() {
-    if (!this.editandoEncuesta) return;
-    this.editandoTexto = true;
-    this.editandoTipo = false;
-  }
-
-  /** Toggle edición de tipo */
-  toggleTipo() {
-    if (!this.editandoEncuesta) return;
-    this.editandoTipo = true;
-    this.editandoTexto = false;
   }
 
   eliminarPregunta() {
     this.eliminar.emit(this.pregunta);
   }
 
-  onSeleccionarRespuesta(valor: any) {
+  onSeleccionarRespuesta(opcion: string) {
     if (!this.editandoEncuesta) return;
-    this.pregunta.respuesta = valor;
 
-    if (this.pregunta?.id && this.pregunta?.idEncuesta) {
-      const url = `https://firestore.googleapis.com/v1/projects/appencuestabd/databases/(default)/documents/${this.pregunta.idEncuesta}/preguntas/${this.pregunta.id}?updateMask.fieldPaths=respuesta`;
+    this.pregunta.seleccion = opcion;
 
-      // 🔧 Construimos el body con el tipo correcto según el valor
-      const body: any = {
-        fields: {
-          respuesta: {}
-        }
-      };
-
-      if (typeof valor === 'number') {
-        body.fields.respuesta.integerValue = valor.toString();
-      } else if (typeof valor === 'boolean') {
-        body.fields.respuesta.booleanValue = valor;
-      } else {
-        body.fields.respuesta.stringValue = valor.toString();
-      }
-
-      this.http.patch(url, body).subscribe({
-        next: (res) => {
-          console.log('✅ Respuesta actualizada correctamente en Firestore', res);
-        },
-        error: (err) => {
-          console.error('❌ Error al actualizar respuesta', err);
-        }
-      });
-    }
-  }
-
-  actualizarEscala() {
-    if (!this.editandoEncuesta) return;
-    this.generarEscala(); // 🔁 Actualiza inmediatamente en pantalla
-
-    const url = `https://firestore.googleapis.com/v1/projects/appencuestabd/databases/(default)/documents/preguntas/${this.pregunta.id}?updateMask.fieldPaths=valorMin&updateMask.fieldPaths=valorMax`;
-
-    const body = {
-      fields: {
-        valorMin: { integerValue: this.pregunta.valorMin?.toString() || '1' },
-        valorMax: { integerValue: this.pregunta.valorMax?.toString() || '5' }
-      }
-    };
-
-    this.http.patch(url, body).subscribe({
-      next: (res) => {
-        console.log('✅ Escala actualizada correctamente en Firestore', res);
-      },
-      error: (err) => {
-        console.error('❌ Error al actualizar escala', err);
-      }
+    this.respuestaSeleccionada.emit({
+      idPregunta: this.pregunta.id!,
+      valor: this.pregunta.seleccion
     });
+
+    this.actualizarCampo({ seleccion: this.pregunta.seleccion });
   }
 
-  generarEscala() {
-    const inicio = Number(this.pregunta.valorMin) || 1;
-    const fin = Number(this.pregunta.valorMax) || 5;
-
-    this.escala = Array.from({ length: fin - inicio + 1 }, (_, i) => i + inicio);
+  onEtiquetaChange() {
+    clearTimeout(this.etiquetaTimeout);
+    this.etiquetaTimeout = setTimeout(() => this.actualizarCampo({
+      etiquetaInicio: this.pregunta.etiquetaInicio,
+      etiquetaFin: this.pregunta.etiquetaFin
+    }), 500);
   }
 
-  actualizarEtiquetas() {
-    if (!this.editandoEncuesta) return;
-    const url = `https://firestore.googleapis.com/v1/projects/appencuestabd/databases/(default)/documents/preguntas/${this.pregunta.id}?updateMask.fieldPaths=etiquetaInicio&updateMask.fieldPaths=etiquetaFin`;
-
-    const body = {
-      fields: {
-        etiquetaInicio: { stringValue: this.pregunta.etiquetaInicio || 'Peor' },
-        etiquetaFin: { stringValue: this.pregunta.etiquetaFin || 'Mejor' }
-      }
-    };
-
-    this.http.patch(url, body).subscribe({
-      next: (res) => {
-        console.log('✅ Etiquetas actualizadas en Firestore', res);
-      },
-      error: (err) => {
-        console.error('❌ Error al actualizar etiquetas', err);
-      }
-    });
-  }
-
+  /* ======== HTTP GENÉRICO ======== */
   actualizarCampo(campos: Record<string, any>) {
-    if (!this.editandoEncuesta) return;
     if (!this.pregunta?.id || !this.pregunta?.idEncuesta) return;
 
     const url = `https://firestore.googleapis.com/v1/projects/appencuestabd/databases/(default)/documents/encuestas/${this.pregunta.idEncuesta}/preguntas/${this.pregunta.id}`;
     const body: any = { fields: {} };
+    const mask: string[] = [];
 
-    for (const [clave, valor] of Object.entries(campos)) {
-      if (valor === undefined) continue; // ✅ Evita undefined
+    Object.entries(campos).forEach(([clave, valor]) => {
+      mask.push(`updateMask.fieldPaths=${clave}`);
       if (valor === null) body.fields[clave] = { nullValue: null };
       else if (typeof valor === 'boolean') body.fields[clave] = { booleanValue: valor };
       else if (typeof valor === 'number') body.fields[clave] = { integerValue: valor.toString() };
-      else body.fields[clave] = { stringValue: valor.toString() };
-    }
-
-    const mask = Object.keys(campos).map(c => `updateMask.fieldPaths=${c}`).join('&');
-    this.http.patch(`${url}?${mask}`, body).subscribe({
-      next: () => console.log('✅ Campo(s) actualizado(s)', campos),
-      error: err => console.error('❌ Error al actualizar campo(s)', err)
+      else body.fields[clave] = { stringValue: valor?.toString() || '' };
     });
+
+    this.http.patch(`${url}?${mask.join('&')}`, body).subscribe({
+      next: () => console.log('✅ Campo(s) actualizado(s)', campos),
+      error: err => console.error('❌ Error actualizando campos', err)
+    });
+  }
+
+  onToggleCheckbox(valor: string, checked: boolean) {
+    if (!this.pregunta.respuestasMarcadas) {
+      this.pregunta.respuestasMarcadas = {};
+    }
+    this.pregunta.respuestasMarcadas[valor] = checked;
+  }
+
+  agregarOpcion(esOtro: boolean = false) {
+    const num = this.pregunta.opciones.length + 1;
+    const nueva = { valor: esOtro ? 'Otro' : `Opción ${num}`, esOtro };
+    this.pregunta.opciones.push(nueva);
+    
+    setTimeout(() => {
+      const inputs = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
+      inputs[inputs.length - 1].focus();
+    }, 50);
+  }
+
+  focusUltimaOpcion() {
+    const inputs = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
+    inputs[inputs.length - 1].focus();
+  }
+
+  guardarOpciones() {
+    // Guardar solo los valores de texto
+    if (!this.pregunta.opciones) return;
+    this.pregunta.opciones = this.pregunta.opciones.filter(op => op.valor.trim() !== '');
+    this.actualizarCampo({ opciones: this.pregunta.opciones.map(op => op.valor) });
+  }
+
+  eliminarOpcion(index: number) {
+    this.pregunta.opciones.splice(index, 1);
+    this.guardarOpciones();
+  }
+
+  focusSiguienteOpcion(index: number, event: Event) {
+    const keyboardEvent = event as KeyboardEvent; // forzar a KeyboardEvent
+    keyboardEvent.preventDefault();
+
+    const siguiente = index + 1;
+    if (siguiente < this.pregunta.opciones.length) {
+      const inputs = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
+      inputs[siguiente]?.focus();
+    } else {
+      this.agregarOpcion();
+      setTimeout(() => {
+        const inputs = Array.from(this.el.nativeElement.querySelectorAll('ion-input input')) as HTMLInputElement[];
+        inputs[siguiente]?.focus();
+      }, 50);
+    }
   }
 }
