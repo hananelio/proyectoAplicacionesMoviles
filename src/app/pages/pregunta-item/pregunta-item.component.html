@@ -49,7 +49,7 @@
     </div>
   </ion-card-header>
 
-  <ion-card-content>
+  <ion-card-content class="preguntas-container">
     <ng-container [ngSwitch]="pregunta.tipo">
       
       <!-- Texto -->
@@ -75,16 +75,36 @@
           <div *ngFor="let op of pregunta.opciones; let i = index" class="opcion-item">
 
             <ion-input
-              [(ngModel)]="op.valor"
-              (ionInput)="guardarOpciones()"
+              [value]="getValorOpcion(op)"
+              (ionInput)="setValorOpcion(op, $event.detail.value ?? '')"
+              placeholder="Escribe una opción"
+              (blur)="guardarOpciones()"
               (keydown.enter)="focusSiguienteOpcion(i, $event)"
-            ></ion-input>
-
+              
+              
+            ></ion-input><!--
+            (keydown.enter)="focusSiguienteOpcion(i, $event)"
+            [ngModel]="op.esOtro ? op.valorUsuario : op.valor"
+            -->
+            
             <ion-button fill="clear" size="small" color="danger" (click)="eliminarOpcion(i)">
               <i class="fa-solid fa-trash"></i>
             </ion-button>
           </div>
-          <ion-button size="small" fill="outline" (click)="agregarOpcion()"><i class="fa-solid fa-circle-plus"></i></ion-button>
+
+          <ion-button
+            color="secondary"
+            size="small"
+            fill="outline"
+            *ngIf="!tieneOtro()"
+            (click)="agregarOpcion(true)"
+          >
+            <i class="fa-solid fa-feather-pointed"></i>Otro
+          </ion-button>
+          
+          <ion-button size="small" fill="outline" (click)="agregarOpcion()">
+            <i class="fa-solid fa-circle-plus"></i>
+          </ion-button>
         </div>
       </ion-radio-group>
 
@@ -107,16 +127,34 @@
           <div *ngFor="let op of pregunta.opciones; let i = index" class="opcion-item">
 
             <ion-input
-              [(ngModel)]="op.valor"
+              [value]="getValorOpcion(op)"
+              (ionInput)="setValorOpcion(op, $event.detail.value ?? '')"
               (blur)="guardarOpciones()"
+              placeholder="Escribe una opción"
               (keydown.enter)="focusSiguienteOpcion(i, $event)"
-            ></ion-input>
+            ></ion-input><!--
+            (keydown.enter)="focusSiguienteOpcion(i, $event)"
+            [ngModel]="op.esOtro ? op.valorUsuario : op.valor"
+            -->
 
             <ion-button fill="clear" size="small" color="danger" (click)="eliminarOpcion(i)">
               <i class="fa-solid fa-trash"></i>
             </ion-button>
           </div>
-          <ion-button size="small" fill="outline" (click)="agregarOpcion()"><i class="fa-solid fa-circle-plus"></i></ion-button>
+
+          <ion-button
+            color="secondary"
+            size="small"
+            fill="outline"
+            *ngIf="!tieneOtro()"
+            (click)="agregarOpcion(true)"
+          >
+            <i class="fa-solid fa-feather-pointed"></i>Otro
+          </ion-button>
+
+          <ion-button size="small" fill="outline" (click)="agregarOpcion()">
+            <i class="fa-solid fa-circle-plus"></i>
+          </ion-button>
         </div>
       </ng-container>
 

@@ -37,9 +37,9 @@ export class EncuestaFormPage implements OnInit {
   editMode = false; //indica si el formulario está en modo edición o creación.
   id!: string; //almacena el parámetro id obtenido desde la URL (/encuesta/editar/:i
   preguntas: Pregunta[] = [];
-  preguntaEditandoId: string | null = null;
+  //preguntaEditandoId: string | null = null;
   @Input() editandoEncuesta: boolean = false;
-  usuario: any;
+  //usuario: any;
 
   constructor( // Inyecta servicios que el componente necesita
     private encuestaService: EncuestaService, //acceder, crear o editar encuestas.
@@ -64,7 +64,11 @@ export class EncuestaFormPage implements OnInit {
         this.preguntaService.getAll(this.id)
           .subscribe( pregs => {
             this.preguntas = pregs.sort((a,b) => a.orden - b.orden);
-        })
+            // ✅ Si la encuesta no tiene preguntas, crear una por defecto
+            if (this.preguntas.length === 0) {
+              this.crearPreguntaInicial();
+            }
+        });
     } else {
       // Crear nueva encuesta → reiniciar los campos
       this.editMode = false;
@@ -79,6 +83,9 @@ export class EncuestaFormPage implements OnInit {
         fechaCierre: new Date(0).toISOString(),
         estado: 'borrador'
       };
+
+      // 👇 Agregar una pregunta inicial
+      //this.agregarPreguntaFinal();
     }
   }
   /**Permite guardar la encuesta */
@@ -102,8 +109,66 @@ export class EncuestaFormPage implements OnInit {
         .subscribe(enc => {
           this.encuesta = enc;
           this.id = enc.id;
+          this.crearPreguntaInicial();
           this.volver()
         });
+    }
+  }
+
+  /** Crea la primera pregunta por defecto */
+  private crearPreguntaInicial() {
+    if (!this.id) return;
+
+    const primera: Pregunta = {
+      idEncuesta: this.id,
+      texto: 'Nueva pregunta',
+      tipo: 'texto',
+      opciones: [],
+      obligatorio: false,
+      orden: 1
+    };
+
+    this.preguntaService.create(primera).subscribe(p => {
+      this.preguntas = [p];
+    });
+  }
+
+  /**Permite agregar preguntas al final */
+  agregarPregunta() {
+    if(!this.id) return; // Solo agregar si la encuesta ya tiene id
+    
+    const nueva: Pregunta = {
+      idEncuesta: this.id,
+      texto: 'Nueva pregunta',
+      tipo: 'texto',
+      opciones: [],
+      obligatorio: false,
+      orden: this.preguntas.length + 1
+    };
+
+    //this.preguntas.push(nueva);
+
+    this.preguntaService.create(nueva).subscribe(resp => {
+      this.preguntas.push(nueva);
+      //if(resp?.id) nueva.id = resp.id;
+    });
+  }
+
+  /** ✅ Eliminar pregunta con validación */
+  eliminarPregunta(pregunta: Pregunta) {
+    if (this.preguntas.length <= 1) {
+      this.alertCtrl.create({
+        header: 'Aviso',
+        message: 'La encuesta debe tener al menos una pregunta.',
+        buttons: ['OK']
+      }).then(a => a.present());
+      return;
+    }
+
+    this.preguntas = this.preguntas.filter(p => p !== pregunta);
+
+    if (pregunta.id) {
+      this.preguntaService.delete(pregunta.idEncuesta!, pregunta.id).subscribe();
     }
   }
 
@@ -117,28 +182,8 @@ export class EncuestaFormPage implements OnInit {
     this.encuestaState.refrescar();
     this.router.navigate(['/encuesta-list'])
   }
-
-  /**Permite agregar preguntas al final */
-  agregarPreguntaFinal() {
-    if(!this.id) return; // Solo agregar si la encuesta ya tiene id
-    
-    const nueva: Pregunta = {
-      idEncuesta: this.id,
-      texto: 'Nueva pregunta',
-      tipo: 'texto',
-      opciones: [],
-      obligatorio: false,
-      orden: this.preguntas.length + 1
-    };
-
-    this.preguntas.push(nueva);
-
-    this.preguntaService.create(nueva).subscribe(resp => {
-      if(resp?.id) nueva.id = resp.id;
-    });
-  }
   /**Permite guardar/actualizar preguntas al final */
-  guardarPregunta() {
+  /*guardarPregunta() {
     this.preguntas.forEach(p => {
       if(p.id) {
         this.preguntaService.update(this.id, p.id, p).subscribe();
@@ -146,25 +191,25 @@ export class EncuestaFormPage implements OnInit {
         this.preguntaService.create(p).subscribe(resp => p.id = resp.id)
       }
     })
-  }
+  }*/
 
-  activarEdicion(idPregunta: string) {
+  /*activarEdicion(idPregunta: string) {
     this.preguntaEditandoId = idPregunta;
   }
 
   desactivarEdicion() {
     this.preguntaEditandoId = null;
-  }
+  }*/
 
-onRespuestaSeleccionada(event: { idPregunta: string, valor: any }) {
-  const nuevaRespuesta: Respuesta = {
-    idPregunta: event.idPregunta,
-    idUsuario: this.usuario.id,
-    respuestas: { valor: event.valor }, // o más campos si quieres
-    fechaEnvio: new Date(),
-    estado: 'borrador'
-  };
+  /*onRespuestaSeleccionada(event: { idPregunta: string, valor: any }) {
+    const nuevaRespuesta: Respuesta = {
+      idPregunta: event.idPregunta,
+      idUsuario: this.usuario.id,
+      respuestas: { valor: event.valor }, // o más campos si quieres
+      fechaEnvio: new Date(),
+      estado: 'borrador'
+    };
 
-  this.respuestaService.guardarRespuesta(nuevaRespuesta);
-}
+    this.respuestaService.guardarRespuesta(nuevaRespuesta);
+  }*/
 }

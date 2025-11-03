@@ -1,6 +1,7 @@
 import { Encuesta } from '../../models/encuesta.model';
 import { DateTime } from 'luxon';
 import { Pregunta } from 'src/app/models/pregunta.model';
+import { Opcion } from 'src/app/models/opcion.model';
 import { Usuario } from 'src/app/models/usuario.model';
 
 export class FirestoreMapear {
@@ -122,24 +123,8 @@ export class FirestoreMapear {
             texto: { stringValue: p.texto },
             seccion: { stringValue: p.seccion ?? '' },
             tipo: { stringValue: p.tipo },
-            orden: { integerValue: p.orden }
-        };
-
-        if (p.obligatorio !== undefined)
-            fields.obligatorio = { booleanValue: p.obligatorio };
-        // Opciones posibles
-        fields.opciones = {
-            arrayValue: {
-                values: p.opciones.map(op => {
-                const fieldsOpcion: any = {
-                    valor: { stringValue: op.valor }
-                };
-                if (op.esOtro !== undefined) {
-                    fieldsOpcion.esOtro = { booleanValue: op.esOtro };
-                }
-                return { mapValue: { fields: fieldsOpcion } };
-                })
-            }
+            orden: { integerValue: p.orden },
+            obligatorio: { booleanValue: !!p.obligatorio }
         };
 
         
@@ -151,21 +136,45 @@ export class FirestoreMapear {
         if (p.etiquetaInicio) fields.etiquetaInicio = { stringValue: p.etiquetaInicio };
         if (p.etiquetaFin) fields.etiquetaFin = { stringValue: p.etiquetaFin };
 
+        // Opciones
+        if(p.opciones?.length) {
+            fields.opciones = {
+                arrayValue: {
+                    values: p.opciones.map((op: Opcion) => ({
+                        mapValue: {
+                            fields: {
+                                valor: { stringValue: op.valor},
+                                ...(op.esOtro !== undefined ? { esOtro: { booleanValue: op.esOtro }}: {}),
+                                ...(op.valorUsuario ? { valorUsuario : { stringValue: op.valorUsuario }}: {})
+                            }
+                        }
+                    }))
+                }
+            };
+        }
+
         return { fields };
     }
-    /**Recibe los datos del Usuario de Firestore */
+    /**Recibe los datos de la Pregunta de Firestore */
     static preguntaFromFirestore (doc: any): Pregunta {
         const f = doc.fields ?? {};
+
+        const opciones: Opcion[] =
+            f.opciones?.arrayValue?.values?.map((v: any) => {
+                const fv = v.mapValue.fields;
+                return {
+                    valor: fv.valor?.stringValue ?? '',
+                    esOtro: fv.esOtro?.booleanValue,
+                    valorUsuario: fv.valorUsuario?.stringValue
+                } as Opcion;
+            }) ?? [];
+
         return {
             id: doc.name?.split('/').pop(),
             idEncuesta: f.idEncuesta.stringValue,
             texto: f.texto?.stringValue,
             seccion: f.seccion?.stringValue,
             tipo: f.tipo?.stringValue,
-            opciones: f.opciones?.arrayValue?.values?.map((v: any) => ({
-                valor: v.mapValue.fields.valor.stringValue,
-                esOtro: v.mapValue.fields.esOtro?.booleanValue
-            })) ?? [],
             obligatorio: f.obligatorio?.booleanValue,
             orden: f.orden?.integerValue,
 
@@ -178,10 +187,39 @@ export class FirestoreMapear {
                 : undefined,
             etiquetaInicio: f.etiquetaInicio?.stringValue ?? '',
             etiquetaFin: f.etiquetaFin?.stringValue ?? '',
+            
+            // 🔹 Incluye las opciones reconstruidas
+            opciones,  // <<--- 🔥 ESTO FALTABA
 
             // Inicializar respuestas vacías para checkbox / opción múltiple
-            respuestas: [] // se llenará desde la subcolección "Respuesta"
-            
+            respuestas: [], // se llenará desde la subcolección "Respuesta"
+            seleccion: undefined,
+            respuestasMarcadas: {}
         }
+    }
+    /**Envía los datos de la Opción a Firestore */
+    static opcionToFirestore(o: Opcion) {
+        /*const fields: any = {
+            idPregunta: { stringValue: o.idPregunta },
+            valor: { stringValue: o.valor }
+        };*/
+        const fields: any = { valor: { stringValue: o.valor } };
+        //if (o.idPregunta) fields.idPregunta = { stringValue: o.idPregunta };
+        if (o.esOtro !== undefined) fields.esOtro = { booleanValue: o.esOtro };
+        if (o.valorUsuario) fields.valorUsuario = { stringValue: o.valorUsuario };
+    
+        return { fields };
+    }
+    /**Recibe los datos de la Opción de Firestore */
+    static opcionFromFirestore (doc: any): Opcion  {
+        const f = doc.fields ?? {};
+
+        return {
+            id: doc.name?.split('/').pop(),
+            idPregunta: f.idPregunta.stringValue,
+            valor: f.valor?.stringValue ?? '',
+            esOtro: f.esOtro?.booleanValue,
+            valorUsuario: f.valorUsuario?.stringValue
+        };
     }
 }

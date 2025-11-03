@@ -1,11 +1,12 @@
 .pregunta-card {
   position: relative;
+  overflow: visible;
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
   margin-bottom: 14px;
   background: var(--ion-card-background, #fff);
   cursor: grab;
-  transition: all 0.3s ease-in-out;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 
   &:hover {
     transform: translateY(-2px);
@@ -13,7 +14,7 @@
 
     .add-btn-container {
       opacity: 1;
-      transform: translateX(-50%) translateY(0);
+      transform: translate(-50%, 0);
       pointer-events: all;
     }
   }
@@ -22,20 +23,21 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding-bottom: 0;
+    padding-bottom: 0.5rem;
 
     .titulo {
       flex: 1;
+      min-width: 0;
 
       .editable-titulo {
         font-size: 1.1rem;
         font-weight: 600;
         color: #333;
         cursor: pointer;
-        transition: color 0.2s;
+        transition: color 0.2s ease;
 
         &:hover {
-          color: #007aff;
+          color: var(--ion-color-primary, #007aff);
         }
       }
 
@@ -45,13 +47,13 @@
         cursor: pointer;
 
         &:hover {
-          color: #007aff;
+          color: var(--ion-color-primary, #007aff);
         }
       }
 
       .editable-input {
         font-size: 1rem;
-        border-bottom: 2px solid #007aff;
+        border-bottom: 2px solid var(--ion-color-primary, #007aff);
       }
 
       .editable-select {
@@ -84,10 +86,10 @@
     position: absolute;
     bottom: -18px;
     left: 50%;
-    transform: translateX(-50%) translateY(10px);
+    transform: translate(-50%, 10px);
     opacity: 0;
     pointer-events: none;
-    transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease;
 
     ion-button {
       --border-radius: 50px;
@@ -113,7 +115,7 @@
 .rango-edicion {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 
   .rango-flex {
     display: flex;
@@ -147,7 +149,7 @@
   }
 }
 
-/* Modo visual / aplicación */
+/* ================= ESCALA VISUAL ================= */
 .rango-visual {
   display: flex;
   flex-direction: column;
@@ -156,6 +158,8 @@
   ion-radio-group {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   ion-item {
@@ -166,8 +170,8 @@
   ion-radio {
     --size: 24px;
     --border-width: 2px;
-    --border-color: #007aff;
-    --checked-color: #007aff;
+    --border-color: var(--ion-color-primary, #007aff);
+    --checked-color: var(--ion-color-primary, #007aff);
   }
 
   .etiquetas-flex {
@@ -177,6 +181,8 @@
     color: #555;
   }
 }
+
+/* ================= ESCALA HORIZONTAL ================= */
 
 .escala-horizontal {
   display: flex;
@@ -199,10 +205,10 @@
   --inner-padding-end: 0;
   --inner-padding-start: 0;
   --min-height: 0;
-}
 
-.opcion-horizontal ion-radio {
-  margin-bottom: 4px;
+  .opcion-horizontal ion-radio {
+    margin-bottom: 4px;
+  }
 }
 
 .etiquetas-flex {
@@ -211,4 +217,38 @@
   width: 100%;
   margin-top: 8px;
   font-size: 0.9rem;
+}
+
+.pregunta-card {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+/* Contenido principal (donde están las opciones) */
+.preguntas-container {
+  flex: 1;
+  overflow: visible;
+  padding-bottom: 12px; /* espacio interno extra */
+}
+
+/* Contenedor del botón */
+.add-btn-container {
+  margin-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 10px;
+  background: var(--ion-card-background, #fff);
+  position: relative;
+  z-index: 5;
+}
+
+/* Botón */
+.add-btn-container ion-button {
+  width: 100%;
+  font-size: 0.9rem;
+  border-radius: 12px;
+}
+
+ion-content {
+  padding-bottom: 80px; /* espacio para el último botón */
 }

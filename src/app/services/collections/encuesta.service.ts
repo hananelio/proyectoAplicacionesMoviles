@@ -1,8 +1,8 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AuthRestService } from '../core/auth-rest.service';
-import { Observable, map, switchMap } from 'rxjs';
-import { Encuesta} from '../../models/encuesta.model'
+import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
+import { Encuesta} from '../../models/encuesta.model';
 import { environment } from 'src/environments/environment';
 import { FirestoreMapear } from 'src/app/core/helpers/firestore-mapear.helper';
 
@@ -14,6 +14,7 @@ export class EncuestaService {
   // https://firestore.googleapis.com/v1/projects/[PROJECT_ID]/databases/(default)/documents/[COLLECTION]
   private base = `https://firestore.googleapis.com/v1/projects/${environment.firebase.projectId}/databases/(default)/documents`;
   private collection = 'encuestas';
+  private subcollection = 'preguntas';
 
   constructor(
     private  http : HttpClient,
@@ -96,10 +97,28 @@ export class EncuestaService {
   }
 
   delete(id : string) : Observable<void> {
-    const url = `${this.base}/${this.collection}/${id}`;
-    
+    const urlBase="https://firestore.googleapis.com/v1";
+    const urlEncuestas = `${this.base}/${this.collection}/${id}`;
+    const urlPreguntas = `${urlEncuestas}/${this.subcollection}`;
+
     return this.headers().pipe(
+      switchMap(headers =>
+        this.http.get<any>(urlPreguntas, { headers }).pipe(
+          switchMap(resp => {
+            // Eliminar cada pregunta individualmente
+            const delete$ = (resp.documents ?? []).map((doc: any) => {
+              return this.http.delete<void>(`${urlBase}/${doc.name}`, { headers });//doc.name
+            });
+            return delete$.length ? forkJoin(delete$): of([]);
+          }),
+          // Finalmente borrar la encuesta
+          switchMap(() => this.http.delete<void>(urlEncuestas, { headers }))
+        )
+      )
+    )
+    
+    /*return this.headers().pipe(
       switchMap(headers => this.http.delete<void>(url, { headers }))
-    );
+    );*/
   }
 }

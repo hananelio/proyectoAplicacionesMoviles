@@ -57,52 +57,53 @@ export class PreguntaService { //Clase Principal
       )
     )
   };
-  /**Actualizar una pregunta existente */
+
   update(idEncuesta: string, idPregunta: string, partial: Partial<Pregunta>): Observable<Pregunta> {
-    const url = `${this.base}/${this.parent}/${idEncuesta}/${this.collection}/${idPregunta}`; //crea la url
+    const url = `${this.base}/${this.parent}/${idEncuesta}/${this.collection}/${idPregunta}`;
     
     const body = { fields: {} as any };
-    Object.keys(partial).forEach(k => {
-      const value = (partial as any)[k];
-      
-      if(typeof value === 'string') body.fields[k] = { stringValue: value };
-      else if(typeof value === 'number') body.fields[k] = { stringValue: value };
-      else if(typeof value === 'boolean') body.fields[k] = { stringVakue: value };
-      /*else if(Array.isArray(value)) {
-        body.fields[k] = { 
-          arrayValue: { values: value.map(v => ({ stringValue: v })) } 
+    Object.entries(partial).forEach(([k, value]) => {
+      if (value === null || value === undefined) {
+        body.fields[k] = { nullValue: null };
+      } else if (typeof value === 'boolean') {
+        body.fields[k] = { booleanValue: value };
+      } else if (typeof value === 'number') {
+        body.fields[k] = { integerValue: value.toString() };
+      } else if (typeof value === 'string') {
+        body.fields[k] = { stringValue: value };
+      } else if (Array.isArray(value)) {
+        // 🔹 Manejar arrays (como opciones)
+        body.fields[k] = {
+          arrayValue: {
+            values: value.map((v: any) => {
+              if (typeof v === 'object' && v.valor !== undefined) {
+                // caso opciones [{ valor, esOtro }]
+                const fieldsOpcion: any = { valor: { stringValue: v.valor } };
+                if (v.esOtro !== undefined)
+                  fieldsOpcion.esOtro = { booleanValue: v.esOtro };
+                return { mapValue: { fields: fieldsOpcion } };
+              }
+              return { stringValue: v.toString() };
+            }),
+          },
         };
-      } else if(value === null || value === undefined) {
-        body.fields[k] = { nullValue : null};
-      }*/
-      else if (value instanceof Array) {
-        body.fields[k] = { arrayValue: { values: value.map(v => ({ stringValue: v })) } };
       }
     });
 
-    //const body = FirestoreMapear.preguntaToFirestore(partial as Pregunta);//convierte los datos a formato firestore
-
-
     let params = new HttpParams();
-    Object.keys(partial).forEach(k => {
-      params = params.append('updateMask.fieldPaths', k)
+    Object.keys(partial).forEach((k) => {
+      params = params.append('updateMask.fieldPaths', k);
     });
-    /*const params = new HttpParams() //define los campos a actualizar
-      .set('updateMask.fieldPaths', 'texto')
-      .append('updateMask.fieldPaths', 'seccion')
-      .append('updateMask.fieldPaths', 'tipo')
-      .append('updateMask.fieldPaths', 'opciones')
-      .append('updateMask.fieldPaths', 'obligatorio')
-      .append('updateMask.fieldPaths', 'orden');*/
 
-    //return this.http.patch<Pregunta>(url, body, { params });
     return this.headers().pipe(
-      switchMap(headers => 
-        this.http.patch<any>(url, body, { headers, params }) //Hacer patch con esos campos
-          .pipe(map(doc => FirestoreMapear.preguntaFromFirestore(doc))) //Convierte la respuesta de Firestore de nuevo a Pregunta
+      switchMap((headers) =>
+        this.http
+          .patch<any>(url, body, { headers, params })
+          .pipe(map((doc) => FirestoreMapear.preguntaFromFirestore(doc)))
       )
-    )
+    );
   }
+
   /**Eliminar una pregunta */
   delete(idEncuesta: string, idPregunta: string): Observable<void>{
     const url = `${this.base}/${this.parent}/${idEncuesta}/${this.collection}/${idPregunta}`; //Construye la URL exacta del documento a eliminar.

@@ -15,8 +15,9 @@ import { HttpClient } from '@angular/common/http';
     CommonModule, IonicModule, FormsModule, ReactiveFormsModule
 ]
 })
-export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
+export class PreguntaItemComponent implements OnChanges, OnDestroy, OnInit {
   @Input() pregunta!: Pregunta;
+  @Input() indice!: number; // 👈 Aquí declaras el input que falta
 
   @Input() editandoEncuesta: boolean = true;
   @Input() editandoTexto: boolean = false;
@@ -26,10 +27,7 @@ export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
   @Output() eliminar = new EventEmitter<Pregunta>();
   @Output() activarEdicion = new EventEmitter<string>();
   @Output() salirEdicion = new EventEmitter<void>();
-
   @Output() respuestaSeleccionada = new EventEmitter<{ idPregunta: string, valor: any }>();
-  selecciones = new Set<string>(); // Para almacenar temporalmente las opciones seleccionadas en checkbox
-  @HostListener('document:click', ['$event'])
 
   escala: number[] = [];
   private clickListener!: any;
@@ -44,38 +42,14 @@ export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
   ) {}
 
   ngOnInit() {
-    // Asegura que siempre exista la pregunta y la propiedad respuestasMarcadas
-    if (!this.pregunta) {
-      this.pregunta = {} as Pregunta;
-    }
-
-    if (!this.pregunta.opciones) {
-      this.pregunta.opciones = [];
-    }
-
-    if (!this.pregunta.respuestasMarcadas) {
-      this.pregunta.respuestasMarcadas = {};
-    }
-
+    // Si la pregunta no existe (undefined), crea un objeto vacío del tipo Pregunta
+    this.pregunta = this.pregunta || {} as Pregunta;
+    // Si no hay opciones, inicializa un array vacío para evitar errores con .push() o .splice()
+    this.pregunta.opciones = this.pregunta.opciones || [];
+    // Inicializa las respuestas marcadas (para checkbox)
     this.pregunta.respuestasMarcadas = this.pregunta.respuestasMarcadas || {};
-    
-    // 🧩 Asegurar estructura de pregunta para evitar undefined
-    if (!this.pregunta.opciones) {
-      this.pregunta.opciones = [];
-    }
-
-    if (!(this.pregunta as any).respuestasMarcadas) {
-      (this.pregunta as any).respuestasMarcadas = {};
-    }
-    // Detectar clic fuera del componente
-    this.clickListener = (event: Event) => {
-      if (!this.el.nativeElement.contains(event.target) && (this.editandoTexto || this.editandoTipo)) {
-        this.editandoTexto = false;
-        this.editandoTipo = false;
-        this.salirEdicion.emit();
-      }
-    }
-    document.addEventListener('click', this.clickListener);
+    // Si la selección es null o undefined, la deja en undefined
+    this.pregunta.seleccion = this.pregunta.seleccion ?? undefined;
   }
   
   ngOnChanges(changes: SimpleChanges) {
@@ -103,6 +77,15 @@ export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
     document.removeEventListener('click', this.clickListener);
   }
 
+  @HostListener('document:click', ['$event'])
+  onClickDocument(event: Event) {
+    if (!this.el.nativeElement.contains(event.target) && (this.editandoTexto || this.editandoTipo)) {
+      this.editandoTexto = false;
+      this.editandoTipo = false;
+      this.salirEdicion.emit();
+    }
+  }
+
   /* ======== ESCALA ======== */
   // Rangos para edición
   get rangoMin(): number[] {
@@ -115,13 +98,6 @@ export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
     return Array.from({ length: 9 }, (_, i) => i + 2); // 0 a 10
   }
 
-  // Genera escala para visualización
-  /*generarEscala() {
-    const inicio = Number(this.pregunta.valorMin) || 1;
-    const fin = Number(this.pregunta.valorMax) || 5;
-
-    this.escala = Array.from({ length: fin - inicio + 1 }, (_, i) => i + inicio);
-  }*/
   generarEscala() {
     if (this.pregunta.valorMin !== undefined && this.pregunta.valorMax !== undefined) {
       this.escala = Array.from(
@@ -164,11 +140,42 @@ export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
   /** Guardar tipo editado */
   guardarTipo() {
     this.editandoTipo = false;
-    this.actualizarCampo({ tipo: this.pregunta.tipo });
+    const nuevoTipo = this.pregunta.tipo;
 
-    if ((this.pregunta.tipo === 'opcion_multiple' || this.pregunta.tipo === 'checkbox') && (!this.pregunta.opciones || this.pregunta.opciones.length === 0)) {
-      this.pregunta.opciones = [{ valor: 'Opción 1' }]; // agrega una opción vacía
+    if (nuevoTipo === 'opcion_multiple' || nuevoTipo === 'checkbox') {
+      this.pregunta.valorMin = undefined;
+      this.pregunta.valorMax = undefined;
+      this.pregunta.etiquetaInicio = '';
+      this.pregunta.etiquetaFin = '';
+
+      if (!this.pregunta.opciones || this.pregunta.opciones.length === 0) {
+        this.pregunta.opciones = [{ valor: 'Opción 1' }];
+      }
+    } else if (nuevoTipo === 'escala') {
+      this.pregunta.opciones = [];
+
+      this.pregunta.valorMin = 1;
+      this.pregunta.valorMax = 5;
+      this.pregunta.etiquetaInicio = 'Bajo';
+      this.pregunta.etiquetaFin = 'Alto';
+      this.generarEscala();
+    } else {
+      // Si es texto u otro tipo, limpia todo lo que no aplique
+      this.pregunta.opciones = [];
+      this.pregunta.valorMin = undefined;
+      this.pregunta.valorMax = undefined;
+      this.pregunta.etiquetaInicio = '';
+      this.pregunta.etiquetaFin = '';
     }
+
+    this.actualizarCampo({
+      tipo: nuevoTipo, //this.pregunta.tipo
+      opciones: this.pregunta.opciones,
+      valorMin: this.pregunta.valorMin,
+      valorMax: this.pregunta.valorMax,
+      etiquetaInicio: this.pregunta.etiquetaInicio,
+      etiquetaFin: this.pregunta.etiquetaFin
+    });
   }
 
   eliminarPregunta() {
@@ -200,22 +207,12 @@ export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
   actualizarCampo(campos: Record<string, any>) {
     if (!this.pregunta?.id || !this.pregunta?.idEncuesta) return;
 
-    const url = `https://firestore.googleapis.com/v1/projects/appencuestabd/databases/(default)/documents/encuestas/${this.pregunta.idEncuesta}/preguntas/${this.pregunta.id}`;
-    const body: any = { fields: {} };
-    const mask: string[] = [];
-
-    Object.entries(campos).forEach(([clave, valor]) => {
-      mask.push(`updateMask.fieldPaths=${clave}`);
-      if (valor === null) body.fields[clave] = { nullValue: null };
-      else if (typeof valor === 'boolean') body.fields[clave] = { booleanValue: valor };
-      else if (typeof valor === 'number') body.fields[clave] = { integerValue: valor.toString() };
-      else body.fields[clave] = { stringValue: valor?.toString() || '' };
-    });
-
-    this.http.patch(`${url}?${mask.join('&')}`, body).subscribe({
-      next: () => console.log('✅ Campo(s) actualizado(s)', campos),
-      error: err => console.error('❌ Error actualizando campos', err)
-    });
+    this.preguntaService
+      .update(this.pregunta.idEncuesta, this.pregunta.id, campos)
+      .subscribe({
+        next: () => console.log('✅ Campo(s) actualizado(s)', campos),
+        error: (err) => console.error('❌ Error actualizando campos', err),
+      });
   }
 
   onToggleCheckbox(valor: string, checked: boolean) {
@@ -226,14 +223,27 @@ export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   agregarOpcion(esOtro: boolean = false) {
+    this.pregunta.opciones = this.pregunta.opciones || [];
+    
+    // Evita agregar "Otro" si ya existe
+    if (esOtro && this.tieneOtro()) return;
+
     const num = this.pregunta.opciones.length + 1;
-    const nueva = { valor: esOtro ? 'Otro' : `Opción ${num}`, esOtro };
+    const nueva: { valor: string; esOtro?: boolean } = { valor: esOtro ? 'Otro' : `Opción ${num}`, esOtro };
+    
     this.pregunta.opciones.push(nueva);
     
     setTimeout(() => {
-      const inputs = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
-      inputs[inputs.length - 1].focus();
+      const activo = document.activeElement as HTMLElement;
+      const entradas = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
+      const ultimo = entradas[entradas.length - 1];
+      // ✅ Evita duplicar foco
+      if (activo !== ultimo) {
+        ultimo?.focus();
+      }
     }, 50);
+
+    this.guardarOpciones();
   }
 
   focusUltimaOpcion() {
@@ -242,13 +252,19 @@ export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   guardarOpciones() {
-    // Guardar solo los valores de texto
     if (!this.pregunta.opciones) return;
-    this.pregunta.opciones = this.pregunta.opciones.filter(op => op.valor.trim() !== '');
-    this.actualizarCampo({ opciones: this.pregunta.opciones.map(op => op.valor) });
+
+    // Filtrar opciones vacías
+    this.pregunta.opciones = this.pregunta.opciones
+        .filter(op => (op.esOtro ? op.valorUsuario?.trim(): op.valor?.trim()) !== "");
+
+    // Enviar directamente el arreglo limpio
+    this.actualizarCampo({ opciones: this.pregunta.opciones });
   }
 
   eliminarOpcion(index: number) {
+    this.pregunta.opciones = this.pregunta.opciones || [];
+
     this.pregunta.opciones.splice(index, 1);
     this.guardarOpciones();
   }
@@ -257,16 +273,42 @@ export class PreguntaItemComponent implements OnInit, OnDestroy, OnChanges {
     const keyboardEvent = event as KeyboardEvent; // forzar a KeyboardEvent
     keyboardEvent.preventDefault();
 
+    this.pregunta.opciones = this.pregunta.opciones || [];
+
     const siguiente = index + 1;
+    const inputs = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
+    
     if (siguiente < this.pregunta.opciones.length) {
-      const inputs = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
-      inputs[siguiente]?.focus();
+      const siguienteInput = inputs[siguiente];
+      if (siguienteInput && document.activeElement !== siguienteInput) {
+        siguienteInput.focus();
+      }
     } else {
       this.agregarOpcion();
       setTimeout(() => {
-        const inputs = Array.from(this.el.nativeElement.querySelectorAll('ion-input input')) as HTMLInputElement[];
-        inputs[siguiente]?.focus();
+        const actualizados = Array.from(this.el.nativeElement.querySelectorAll('ion-input input')) as HTMLInputElement[];
+        const nuevo = actualizados[siguiente];
+        if (nuevo && document.activeElement !== nuevo) {
+          nuevo.focus();
+        }
       }, 50);
     }
+  }
+
+  getValorOpcion(op: any): string {
+    return op.esOtro ? (op.valorUsuario || '') : op.valor;
+  }
+
+  setValorOpcion(op: any, valor: string) {
+    if (op.esOtro) {
+      op.valorUsuario = valor;
+    } else {
+      op.valor = valor;
+    }
+    this.guardarOpciones();
+  }
+
+  tieneOtro(): boolean {
+    return this.pregunta.opciones?.some(op => op.esOtro) || false;
   }
 }
