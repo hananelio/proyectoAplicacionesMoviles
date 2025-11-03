@@ -34,6 +34,7 @@ export class PreguntaItemComponent implements OnChanges, OnDestroy, OnInit {
   private etiquetaTimeout: any;
 
   tiposPregunta = ['texto', 'opcion_multiple', 'checkbox', 'escala'];
+opcion: any;
 
   constructor(
     private preguntaService: PreguntaService,
@@ -182,15 +183,19 @@ export class PreguntaItemComponent implements OnChanges, OnDestroy, OnInit {
     this.eliminar.emit(this.pregunta);
   }
 
-  onSeleccionarRespuesta(opcion: string) {
+  onSeleccionarRespuesta(opcion: any) {
     if (!this.editandoEncuesta) return;
 
     this.pregunta.seleccion = opcion;
 
-    this.respuestaSeleccionada.emit({
-      idPregunta: this.pregunta.id!,
-      valor: this.pregunta.seleccion
-    });
+    if (opcion.esOtro) {
+      opcion.valorUsuario = opcion.valorUsuario || '';
+    } else {
+      this.respuestaSeleccionada.emit({
+        idPregunta: this.pregunta.id!,
+        valor: opcion.valor
+      });
+    }
 
     this.actualizarCampo({ seleccion: this.pregunta.seleccion });
   }
@@ -310,5 +315,20 @@ export class PreguntaItemComponent implements OnChanges, OnDestroy, OnInit {
 
   tieneOtro(): boolean {
     return this.pregunta.opciones?.some(opcion => opcion.esOtro) || false;
+  }
+
+  onCambioValorOtro(opcion: any) {
+    if (!this.editandoEncuesta) return;
+
+    // Guardar y emitir cuando el usuario escribe en "Otro"
+    this.respuestaSeleccionada.emit({
+      idPregunta: this.pregunta.id!,
+      valor: opcion.valorUsuario || opcion.valor
+    });
+
+    this.actualizarCampo({
+      seleccion: this.pregunta.seleccion,
+      opciones: this.pregunta.opciones
+    });
   }
 }

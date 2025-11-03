@@ -58,17 +58,34 @@
       <!-- Opción múltiple -->
       <ion-radio-group
         *ngSwitchCase="'opcion_multiple'"
-        [(ngModel)]="respuestaSeleccionada"
+        [(ngModel)]="pregunta.seleccion"
         (ionChange)="onSeleccionarRespuesta($event.detail.value)"
-        >
+      >
 
         <!-- Modo vista -->
-        <div *ngIf="!editandoTipo && pregunta.opciones">
+        <ng-container *ngIf="!editandoTipo && pregunta.opciones">
+
           <ion-item *ngFor="let opcion of pregunta.opciones">
             <ion-label>{{ opcion.valor }}</ion-label>
-            <ion-radio slot="start" [value]="opcion.valor"></ion-radio>
+
+            <ion-radio
+              slot="start"
+              [value]="opcion.valor"
+              (ionSelect)="onSeleccionarRespuesta(opcion)"
+            ></ion-radio>
+
           </ion-item>
-        </div>
+
+          <ng-container *ngFor="let opcion of pregunta.opciones">
+            <ion-item *ngIf="opcion.esOtro && pregunta.seleccion === opcion.valor">
+              <ion-input
+                placeholder="Especifique..."
+                [(ngModel)]="opcion.valorUsuario"
+                (ionInput)="onCambioValorOtro(opcion)"
+              ></ion-input>
+            </ion-item>
+          </ng-container>
+        </ng-container>
 
         <!-- Edición de opciones -->
         <div *ngIf="editandoTipo && pregunta.opciones">
@@ -107,14 +124,27 @@
       <ng-container *ngSwitchCase="'checkbox'">
         <!-- Modo vista -->
         <div *ngIf="!editandoTipo && pregunta.opciones">
-          <ion-item *ngFor="let opcion of pregunta.opciones">
-            <ion-checkbox
-              slot="start"
-              [checked]="pregunta.respuestasMarcadas?.[opcion.valor] || false"
-              (ionChange)="onToggleCheckbox(opcion.valor, $event.detail.checked)"
-            ></ion-checkbox>
-            <ion-label>{{ opcion.valor }}</ion-label>
-          </ion-item>
+          <ng-container *ngFor="let opcion of pregunta.opciones">
+
+            <ion-item>
+              <ion-checkbox
+                slot="start"
+                [checked]="pregunta.respuestasMarcadas?.[opcion.valor] || false"
+                (ionChange)="onToggleCheckbox(opcion.valor, $event.detail.checked)"
+              ></ion-checkbox>
+              <ion-label>{{ opcion.valor }}</ion-label>
+            </ion-item>
+
+            <!-- Mostrar input si “Otro” está marcado -->
+            <ion-item *ngIf="opcion.esOtro && pregunta.respuestasMarcadas?.[opcion.valor]">
+              <ion-input
+                placeholder="Especifique..."
+                [(ngModel)]="opcion.valorUsuario"
+                (ionInput)="onCambioValorOtro(opcion)"
+                clearInput>
+              </ion-input>
+            </ion-item>
+          </ng-container>
         </div>
 
         <!-- Modo edición de opciones -->
