@@ -256,7 +256,7 @@ export class PreguntaItemComponent implements OnChanges, OnDestroy, OnInit {
 
     // Filtrar opciones vacías
     this.pregunta.opciones = this.pregunta.opciones
-        .filter(op => (op.esOtro ? op.valorUsuario?.trim(): op.valor?.trim()) !== "");
+        .filter(opcion => (opcion.esOtro ? opcion.valorUsuario?.trim(): opcion.valor?.trim()) !== "");
 
     // Enviar directamente el arreglo limpio
     this.actualizarCampo({ opciones: this.pregunta.opciones });
@@ -295,20 +295,20 @@ export class PreguntaItemComponent implements OnChanges, OnDestroy, OnInit {
     }
   }
 
-  getValorOpcion(op: any): string {
-    return op.esOtro ? (op.valorUsuario || '') : op.valor;
+  getValorOpcion(opcion: any): string {
+    return opcion.esOtro ? (opcion.valorUsuario || '') : opcion.valor;
   }
 
-  setValorOpcion(op: any, valor: string) {
-    if (op.esOtro) {
-      op.valorUsuario = valor;
+  setValorOpcion(opcion: any, valor: string) {
+    if (opcion.esOtro) {
+      opcion.valorUsuario = valor;
     } else {
-      op.valor = valor;
+      opcion.valor = valor;
     }
     this.guardarOpciones();
   }
 
   tieneOtro(): boolean {
-    return this.pregunta.opciones?.some(op => op.esOtro) || false;
+    return this.pregunta.opciones?.some(opcion => opcion.esOtro) || false;
   }
 }

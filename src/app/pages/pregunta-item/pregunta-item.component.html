@@ -64,28 +64,23 @@
 
         <!-- Modo vista -->
         <div *ngIf="!editandoTipo && pregunta.opciones">
-          <ion-item *ngFor="let op of pregunta.opciones">
-            <ion-label>{{ op.valor }}</ion-label>
-            <ion-radio slot="start" [value]="op.valor"></ion-radio>
+          <ion-item *ngFor="let opcion of pregunta.opciones">
+            <ion-label>{{ opcion.valor }}</ion-label>
+            <ion-radio slot="start" [value]="opcion.valor"></ion-radio>
           </ion-item>
         </div>
 
         <!-- Edición de opciones -->
         <div *ngIf="editandoTipo && pregunta.opciones">
-          <div *ngFor="let op of pregunta.opciones; let i = index" class="opcion-item">
+          <div *ngFor="let opcion of pregunta.opciones; let i = index" class="opcion-item">
 
             <ion-input
-              [value]="getValorOpcion(op)"
-              (ionInput)="setValorOpcion(op, $event.detail.value ?? '')"
+              [value]="getValorOpcion(opcion)"
+              (ionInput)="setValorOpcion(opcion, $event.detail.value ?? '')"
               placeholder="Escribe una opción"
               (blur)="guardarOpciones()"
               (keydown.enter)="focusSiguienteOpcion(i, $event)"
-              
-              
-            ></ion-input><!--
-            (keydown.enter)="focusSiguienteOpcion(i, $event)"
-            [ngModel]="op.esOtro ? op.valorUsuario : op.valor"
-            -->
+            ></ion-input>
             
             <ion-button fill="clear" size="small" color="danger" (click)="eliminarOpcion(i)">
               <i class="fa-solid fa-trash"></i>
@@ -112,30 +107,27 @@
       <ng-container *ngSwitchCase="'checkbox'">
         <!-- Modo vista -->
         <div *ngIf="!editandoTipo && pregunta.opciones">
-          <ion-item *ngFor="let op of pregunta.opciones">
+          <ion-item *ngFor="let opcion of pregunta.opciones">
             <ion-checkbox
               slot="start"
-              [checked]="pregunta.respuestasMarcadas?.[op.valor] || false"
-              (ionChange)="onToggleCheckbox(op.valor, $event.detail.checked)"
+              [checked]="pregunta.respuestasMarcadas?.[opcion.valor] || false"
+              (ionChange)="onToggleCheckbox(opcion.valor, $event.detail.checked)"
             ></ion-checkbox>
-            <ion-label>{{ op.valor }}</ion-label>
+            <ion-label>{{ opcion.valor }}</ion-label>
           </ion-item>
         </div>
 
         <!-- Modo edición de opciones -->
         <div *ngIf="editandoTipo && pregunta.opciones">
-          <div *ngFor="let op of pregunta.opciones; let i = index" class="opcion-item">
+          <div *ngFor="let opcion of pregunta.opciones; let i = index" class="opcion-item">
 
             <ion-input
-              [value]="getValorOpcion(op)"
-              (ionInput)="setValorOpcion(op, $event.detail.value ?? '')"
+              [value]="getValorOpcion(opcion)"
+              (ionInput)="setValorOpcion(opcion, $event.detail.value ?? '')"
               (blur)="guardarOpciones()"
               placeholder="Escribe una opción"
               (keydown.enter)="focusSiguienteOpcion(i, $event)"
-            ></ion-input><!--
-            (keydown.enter)="focusSiguienteOpcion(i, $event)"
-            [ngModel]="op.esOtro ? op.valorUsuario : op.valor"
-            -->
+            ></ion-input>
 
             <ion-button fill="clear" size="small" color="danger" (click)="eliminarOpcion(i)">
               <i class="fa-solid fa-trash"></i>
