@@ -1,269 +1,216 @@
 <ion-card class="pregunta-card">
-  <ion-card-header class="header-flex">
-    <div class="titulo">
-      <!-- Título -->
+  <!-- TEXTO DE LA PREGUNTA -->
+  <ion-card-header (click)="toggleNombre($event)">
+    <div class="titulo-pregunta">
+      <ion-chip
+        color="primary"
+        class="orden-chip"
+      >
+        {{ pregunta.orden }}
+      </ion-chip>
+
       <ion-input
-        *ngIf="editandoTexto"
-        [(ngModel)]="pregunta.texto"
-        (blur)="guardarTexto()"
-        (keydown.enter)="guardarTexto()"
+        *ngIf="editandoNombre"
+        [(ngModel)]="pregunta.nombre"
+        (blur)="guardarNombre()"
+        placeholder="Escribe tu pregunta..."
         autofocus
-        class="editable-input">
-      </ion-input>
-
-      <ion-card-title
-        *ngIf="!editandoTexto"
-        class="editable-titulo"
-        (click)="toggleTexto($event)">
-        {{ pregunta.texto }}
-      </ion-card-title>
-
-      <!-- Tipo -->
-      <ion-card-subtitle
-        *ngIf="!editandoTipo"
-        class="editable-tipo"
-        (click)="toggleTipo($event)">
-        {{ pregunta.tipo | uppercase }}
-      </ion-card-subtitle>
-
-      <ion-select
-        *ngIf="editandoTipo"
-        [(ngModel)]="pregunta.tipo"
-        (ionChange)="guardarTipo()"
-        interface="popover"
-        class="editable-select">
-        <ion-select-option *ngFor="let t of tiposPregunta" [value]="t">
-          {{ t | uppercase }}
-        </ion-select-option>
-      </ion-select>
-    </div>
-
-    <!-- Acciones -->
-    <div class="acciones">
-      <ion-button fill="clear" color="medium" size="small" (click)="toggleTexto()">
-        <i class="fa-solid fa-pen-to-square"></i>
-      </ion-button>
-      <ion-button fill="clear" color="danger" size="small" (click)="eliminarPregunta()">
-        <i class="fa-solid fa-trash"></i>
-      </ion-button>
+      ></ion-input>
+      
+      <ion-label *ngIf="!editandoNombre">
+        {{ pregunta.nombre || 'Nueva pregunta' }}
+        <span *ngIf="pregunta.obligatorio" style="color: red">*</span>
+      </ion-label>
     </div>
   </ion-card-header>
 
-  <ion-card-content class="preguntas-container">
-    <ng-container [ngSwitch]="pregunta.tipo">
-      
-      <!-- Texto -->
-      <ion-input *ngSwitchCase="'texto'" placeholder="Respuesta..."></ion-input>
+  <!-- TIPO DE PREGUNTA -->
+  <ion-item (click)="toggleTipo($event)" lines="none">
+    <ion-label [hidden]="editandoTipo">Tipo: {{ pregunta.tipo || 'texto' }}</ion-label>
+    <ion-select [hidden]="!editandoTipo" [(ngModel)]="pregunta.tipo" (ionChange)="guardarTipo()">
+      <ion-select-option *ngFor="let tipo of tiposPregunta" [value]="tipo">{{ tipo | titlecase }}</ion-select-option>
+    </ion-select>
+  </ion-item>
 
-      <!-- Opción múltiple -->
-      <ion-radio-group
-        *ngSwitchCase="'opcion_multiple'"
-        [(ngModel)]="pregunta.seleccion"
-        (ionChange)="onSeleccionarRespuesta($event.detail.value)"
-      >
+  <!-- OPCIONES -->
+  <ng-container *ngIf="pregunta.tipo === 'seleccion_unica' || pregunta.tipo === 'seleccion_multiple'">
+    
+    <ion-radio-group>
+      <ion-list>
 
-        <!-- Modo vista -->
-        <ng-container *ngIf="!editandoTipo && pregunta.opciones">
+        <!-- Checkbox o inputs para edición / otro -->
+        <ion-item *ngFor="let opcion of pregunta.opciones; let i = index">
 
-          <ion-item *ngFor="let opcion of pregunta.opciones">
-            <ion-label>{{ opcion.valor }}</ion-label>
+          <!-- Dentro del *ngFor de opciones -->
+          <ion-radio
+            *ngIf="pregunta.tipo === 'seleccion_unica'"
+            slot="start"
+            [value]="opcion.valor"
+            (ionSelect)="onSeleccionarRespuesta(opcion)">
+          </ion-radio>
 
-            <ion-radio
-              slot="start"
-              [value]="opcion.valor"
-              (ionSelect)="onSeleccionarRespuesta(opcion)"
-            ></ion-radio>
+          <!-- Input normal -->
+          <ion-input
+            [hidden]="opcion.esOtro"
+            [(ngModel)]="opcion.valor"
+            (ionBlur)="setValorOpcion(opcion, opcion.valor)"
+            placeholder="Opción {{ i + 1 }}"
+          ></ion-input>
 
-          </ion-item>
+          <!-- Input 'Otro' -->
+          <ion-input
+            [hidden]="!opcion.esOtro"
+            [(ngModel)]="opcion.valorUsuario"
+            (ionInput)="onCambioValorOtro(opcion)"
+            placeholder="Escribe tu respuesta"
+          ></ion-input>
 
-          <ng-container *ngFor="let opcion of pregunta.opciones">
-            <ion-item *ngIf="opcion.esOtro && pregunta.seleccion === opcion.valor">
-              <ion-input
-                placeholder="Especifique..."
-                [(ngModel)]="opcion.valorUsuario"
-                (ionInput)="onCambioValorOtro(opcion)"
-              ></ion-input>
-            </ion-item>
-          </ng-container>
-        </ng-container>
+          <!-- Checkbox solo si tipo es checkbox -->
+          <ion-checkbox
+            *ngIf="pregunta.tipo === 'seleccion_multiple'"
+            slot="start"
+            [checked]="pregunta.respuestasMarcadas?.[opcion.valor]"
+            (ionChange)="onToggleCheckbox(opcion.valor, $event.detail.checked)"
+          ></ion-checkbox>
 
-        <!-- Edición de opciones -->
-        <div *ngIf="editandoTipo && pregunta.opciones">
-          <div *ngFor="let opcion of pregunta.opciones; let i = index" class="opcion-item">
-
-            <ion-input
-              [value]="getValorOpcion(opcion)"
-              (ionInput)="setValorOpcion(opcion, $event.detail.value ?? '')"
-              placeholder="Escribe una opción"
-              (blur)="guardarOpciones()"
-              (keydown.enter)="focusSiguienteOpcion(i, $event)"
-            ></ion-input>
-            
-            <ion-button fill="clear" size="small" color="danger" (click)="eliminarOpcion(i)">
-              <i class="fa-solid fa-trash"></i>
-            </ion-button>
-          </div>
-
-          <ion-button
-            color="secondary"
-            size="small"
-            fill="outline"
-            *ngIf="!tieneOtro()"
-            (click)="agregarOpcion(true)"
-          >
-            <i class="fa-solid fa-feather-pointed"></i>Otro
+          <!-- Botón eliminar -->
+          <ion-button fill="clear" color="danger" (click)="eliminarOpcion(i)">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
           </ion-button>
-          
-          <ion-button size="small" fill="outline" (click)="agregarOpcion()">
-            <i class="fa-solid fa-circle-plus"></i>
-          </ion-button>
-        </div>
-      </ion-radio-group>
+        </ion-item>
+      </ion-list>
+    </ion-radio-group>
 
-      <!-- Checkbox -->
-      <ng-container *ngSwitchCase="'checkbox'">
-        <!-- Modo vista -->
-        <div *ngIf="!editandoTipo && pregunta.opciones">
-          <ng-container *ngFor="let opcion of pregunta.opciones">
-
-            <ion-item>
-              <ion-checkbox
-                slot="start"
-                [checked]="pregunta.respuestasMarcadas?.[opcion.valor] || false"
-                (ionChange)="onToggleCheckbox(opcion.valor, $event.detail.checked)"
-              ></ion-checkbox>
-              <ion-label>{{ opcion.valor }}</ion-label>
-            </ion-item>
-
-            <!-- Mostrar input si “Otro” está marcado -->
-            <ion-item *ngIf="opcion.esOtro && pregunta.respuestasMarcadas?.[opcion.valor]">
-              <ion-input
-                placeholder="Especifique..."
-                [(ngModel)]="opcion.valorUsuario"
-                (ionInput)="onCambioValorOtro(opcion)"
-                clearInput>
-              </ion-input>
-            </ion-item>
-          </ng-container>
-        </div>
-
-        <!-- Modo edición de opciones -->
-        <div *ngIf="editandoTipo && pregunta.opciones">
-          <div *ngFor="let opcion of pregunta.opciones; let i = index" class="opcion-item">
-
-            <ion-input
-              [value]="getValorOpcion(opcion)"
-              (ionInput)="setValorOpcion(opcion, $event.detail.value ?? '')"
-              (blur)="guardarOpciones()"
-              placeholder="Escribe una opción"
-              (keydown.enter)="focusSiguienteOpcion(i, $event)"
-            ></ion-input>
-
-            <ion-button fill="clear" size="small" color="danger" (click)="eliminarOpcion(i)">
-              <i class="fa-solid fa-trash"></i>
-            </ion-button>
-          </div>
-
-          <ion-button
-            color="secondary"
-            size="small"
-            fill="outline"
-            *ngIf="!tieneOtro()"
-            (click)="agregarOpcion(true)"
-          >
-            <i class="fa-solid fa-feather-pointed"></i>Otro
-          </ion-button>
-
-          <ion-button size="small" fill="outline" (click)="agregarOpcion()">
-            <i class="fa-solid fa-circle-plus"></i>
-          </ion-button>
-        </div>
-      </ng-container>
-
-      <!-- Escala -->
-      <div *ngSwitchCase="'escala'" class="escala-container">
-        <!-- MODO EDICIÓN: mantiene tus selectores y etiquetas -->
-        <div *ngIf="editandoTexto" class="rango-edicion">
-          <!-- Rango -->
-          <div class="rango-flex">
-            <!--Valor mínimo-->
-            <span>De</span>
-            <ion-select
-              [(ngModel)]="pregunta.valorMin"
-              (ionChange)="actualizarEscala()"
-              interface="popover"
-            >
-              <ion-select-option *ngFor="let n of rangoMin" [value]="n">{{ n }}</ion-select-option>
-            </ion-select>
-            
-            <!--Valor máximo-->
-            <span>a</span>
-            <ion-select
-              [(ngModel)]="pregunta.valorMax"
-              (ionChange)="actualizarEscala()"
-              interface="popover"
-            ><!--[disabled]="editandoEncuesta"-->
-              <ion-select-option *ngFor="let n of rangoMax" [value]="n">{{ n }}</ion-select-option>
-            </ion-select>
-          </div>
-
-          <!-- Etiquetas -->
-          <div class="etiquetas-flex">
-            <!-- Etiqueta valor mínimo -->
-            <div class="etiqueta-item">
-              <span>{{ pregunta.valorMin }}</span>
-                <ion-input
-                  [(ngModel)]="pregunta.etiquetaInicio"
-                  placeholder="Etiqueta izquierda"
-                  (ionInput)="onEtiquetaChange()">
-                </ion-input>
-            </div>
-            <!-- Etiqueta valor máximo -->
-            <div class="etiqueta-item">
-              <span>{{ pregunta.valorMax }}</span>
-              <ion-input
-                [(ngModel)]="pregunta.etiquetaFin"
-                placeholder="Etiqueta derecha"
-                (ionInput)="onEtiquetaChange()">
-              </ion-input>
-            </div>
-          </div>
-          
-          <ion-item>
-            <ion-label>Obligatorio</ion-label>
-            <ion-toggle
-              [(ngModel)]="pregunta.obligatorio"
-              (ionChange)="actualizarCampo({ obligatorio: pregunta.obligatorio })"
-            ></ion-toggle>
-          </ion-item>
-        </div>
-        <!-- MODO VISTA / APLICACIÓN: estilo Google Forms -->
-        <div *ngIf="!editandoTexto" class="rango-visual">
-          <ion-radio-group
-            [(ngModel)]="pregunta.seleccion"
-            (ionChange)="onSeleccionarRespuesta($event.detail.value)" class="escala-horizontal"
-          >
-            <div class="escala-opciones">
-              <ion-item *ngFor="let n of escala" class="opcion-horizontal">
-                <ion-radio slot="start" [value]="n"></ion-radio>
-                <ion-label>{{ n }}</ion-label>
-              </ion-item>
-            </div>
-          </ion-radio-group>
-
-          <div class="etiquetas-flex">
-            <span>{{ pregunta.etiquetaInicio }}</span>
-            <span>{{ pregunta.etiquetaFin }}</span>
-          </div>
-        </div>
-      </div>
-    </ng-container>
-  </ion-card-content>
-
-  <ion-card-content class="add-btn-container">
-    <ion-button expand="block" fill="outline" size="small" (click)="agregarDebajo.emit()">
-      <i slot="start" class="fa-solid fa-circle-plus"></i>
-      Agregar pregunta debajo
+    <ion-button fill="clear" color="secondary" (click)="agregarOpcion()">
+      <ion-icon name="add"></ion-icon>Opción
     </ion-button>
-  </ion-card-content>
+    <ion-button fill="clear" color="secondary" *ngIf="!tieneOtro()" (click)="agregarOpcion(true)">
+      <ion-icon name="add-circle"></ion-icon>Otro
+    </ion-button>
+  </ng-container>
+
+  <!-- ESCALA -->
+  <ng-container *ngIf="pregunta.tipo === 'escala'">
+    <ion-row>
+
+      <ion-col>
+        <ion-item>
+          <ion-label>Valor mínimo</ion-label>
+          <!--<ion-input type="number" [(ngModel)]="pregunta.valorMin" (ionBlur)="actualizarEscala()"></ion-input>-->
+          <ion-select [(ngModel)]="pregunta.valorMin" (ionChange)="actualizarEscala()">
+            <ion-select-option *ngFor="let min of valoresMinimos" [value]="min">
+              {{ min }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+
+      <ion-col>
+        <ion-item>
+          <ion-label>Valor máximo</ion-label>
+          <!--<ion-input type="number" [(ngModel)]="pregunta.valorMax" (ionBlur)="actualizarEscala()"></ion-input>-->
+          <ion-select [(ngModel)]="pregunta.valorMax" (ionChange)="actualizarEscala()">
+            <ion-select-option *ngFor="let max of valoresMaximos" [value]="max">
+              {{ max }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+      
+    </ion-row>
+
+    <ion-row>
+      <ion-col>
+        <ion-item>
+          <ion-label>Etiqueta inicio</ion-label>
+          <ion-input [(ngModel)]="pregunta.etiquetaInicio" (ionInput)="onEtiquetaChange()"></ion-input>
+        </ion-item>
+      </ion-col>
+
+      <ion-col>
+        <ion-item>
+          <ion-label>Etiqueta fin</ion-label>
+          <ion-input [(ngModel)]="pregunta.etiquetaFin" (ionInput)="onEtiquetaChange()"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+<!--
+    <ion-item *ngFor="let val of escala">
+      <ion-label>{{ val }}</ion-label>
+      <ion-radio-group *ngIf="editandoEncuesta" [(ngModel)]="pregunta.seleccion" (ionChange)="respuestaSeleccionada.emit({ idPregunta: pregunta.id!, valor: $event.detail.value })">
+        <ion-radio [value]="val"></ion-radio>
+      </ion-radio-group>
+    </ion-item>
+-->
+    <ion-item lines="none">
+      <ion-label>{{ pregunta.etiquetaInicio }}</ion-label>
+      <!--
+      <ion-radio-group *ngIf="editandoEncuesta" [(ngModel)]="pregunta.seleccion" (ionChange)="respuestaSeleccionada.emit({ idPregunta: pregunta.id!, valor: $event.detail.value })" class="radio-horizontal">
+        <ion-row>
+          <ion-col *ngFor="let val of escala" class="ion-text-center">
+            <ion-radio [value]="val"></ion-radio>
+            <div>{{ val }}</div>
+          </ion-col>
+        </ion-row>
+      </ion-radio-group>
+      -->
+      <ion-range
+        aria-label="Seleccionar valor de escala"
+        [ticks]="true"
+        [snaps]="true"
+        [pin]="true"
+        *ngIf="editandoEncuesta" 
+        min="{{pregunta.valorMin}}" 
+        max="{{pregunta.valorMax}}" 
+        [step]="1" 
+        [(ngModel)]="pregunta.seleccion"
+        (ionChange)="respuestaSeleccionada.emit({ idPregunta: pregunta.id!, valor: $event.detail.value }); actualizarCampo({ seleccion: pregunta.seleccion })"
+      >
+        <ion-label slot="start">{{ pregunta.valorMin }}</ion-label>
+        <ion-label slot="end">{{ pregunta.valorMax }}</ion-label>
+      </ion-range>
+      <ion-label>{{ pregunta.etiquetaFin }}</ion-label>
+    </ion-item>
+
+  </ng-container>
+
+  <!-- ACCIONES -->
+  <ion-row class="ion-justify-content-center">
+    <ion-col size="auto" class="ion-text-center">
+      <ion-button
+        shape="round" fill="clear"
+        color="danger" aria-label="Eliminar pregunta"
+        (click)="eliminarPregunta()"
+      >
+        <ion-icon slot="icon-only" size="large" name="trash"></ion-icon>
+      </ion-button>
+    </ion-col>
+    <ion-col size="auto" class="ion-text-center">
+      <ion-button
+        shape="round" fill="clear"
+        color="success" aria-label="Agregar nueva pregunta debajo"
+        (click)="agregarDebajo.emit(indice - 1)"
+      >
+        <ion-icon slot="icon-only" size="large" name="add-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-col>
+  </ion-row>
+
+  <ion-row class="ion-align-items-center ion-justify-content-end">
+
+    <ion-col size="auto">
+      <span [style.color]="pregunta.obligatorio ? 'var(--ion-color-success)' : 'var(--ion-color-medium)'">
+        {{ pregunta.obligatorio ? 'Obligatorio' : 'Opcional' }}
+      </span>
+    </ion-col>
+
+    <ion-col size="auto">
+      <ion-toggle
+        [(ngModel)]="pregunta.obligatorio"
+        [color]="pregunta.obligatorio ? 'success' : 'medium'"
+        (ionChange)="actualizarCampo({ obligatorio: pregunta.obligatorio })"
+      ></ion-toggle>
+    </ion-col>
+  </ion-row>
 </ion-card>

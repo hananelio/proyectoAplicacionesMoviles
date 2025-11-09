@@ -3,7 +3,8 @@
     <app-pregunta-item
       [pregunta]="pregunta"
       [indice]="i + 1"
-      (eliminar)="onEliminar(pregunta)"
+      (eliminar)="onEliminarPregunta(pregunta)"
+      (agregarDebajo)="onAgregarPreguntaDebajo($event)"
     ></app-pregunta-item>
   </div>
 
@@ -12,7 +13,7 @@
     fill="outline"
     size="small"
     color="primary"
-    (click)="onAgregar()"
+    (click)="onAgregarPregunta()"
   >
     <i slot="start" class="fa-solid fa-circle-plus"></i>
     Agregar nueva pregunta
@@ -26,7 +27,7 @@
       fill="outline"
       size="small"
       color="primary"
-      (click)="onAgregar()">
+      (click)="onAgregarPregunta()">
       <i slot="start" class="fa-solid fa-circle-plus"></i>
       Crear primera pregunta
     </ion-button>

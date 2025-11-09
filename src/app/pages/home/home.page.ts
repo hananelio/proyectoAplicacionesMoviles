@@ -58,6 +58,8 @@ export class HomePage { //FormLoginComponent
   //get email() { return this.loginForm.get('email'); }
   //get password() { return this.loginForm.get('password'); }
   private checkSession () {
+    (document.activeElement as HTMLElement)?.blur();
+
     this.authentication.getToken().subscribe({
       next: token => {
         console.log('Token válido encontrado:', token);

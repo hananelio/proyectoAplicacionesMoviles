@@ -4,9 +4,9 @@ import { Respuesta } from "./respuesta.model";
 export interface Pregunta {
   id?: string;
   idEncuesta: string;
-  texto: string;
+  nombre: string;
   seccion?: string;
-  tipo: 'texto' | 'opcion_multiple' | 'checkbox' | 'escala';
+  tipo: 'texto' | 'seleccion_unica' | 'seleccion_multiple' | 'escala' | 'desplegable' | 'calificacion';
   obligatorio: boolean;
   orden: number;
   opciones?: Opcion[];

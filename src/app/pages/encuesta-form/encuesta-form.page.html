@@ -42,6 +42,7 @@
     <ion-card-content>
       <app-pregunta-list 
         [preguntas]="preguntas"
+        [idEncuesta]="encuesta.id"
         (agregar)="agregarPregunta()"
         (eliminar)="eliminarPregunta($event)"
       ></app-pregunta-list>

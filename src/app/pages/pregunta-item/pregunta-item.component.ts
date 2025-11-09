@@ -1,110 +1,96 @@
 import { Component, EventEmitter, Input, Output, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges, HostListener } from '@angular/core';
 import { Pregunta } from 'src/app/models/pregunta.model';
 import { PreguntaService } from 'src/app/services/collections/pregunta.service';
-import { CommonModule, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { FormsModule, ReactiveFormsModule  } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { addIcons } from 'ionicons';
+import { add, addCircle, addCircleOutline, options, trash, trashOutline } from 'ionicons/icons';
+
+export interface Opcion {
+  valor: string;
+  esOtro?: boolean;
+  valorUsuario?: string;
+}
 
 @Component({
   selector: 'app-pregunta-item',
   templateUrl: './pregunta-item.component.html',
   styleUrls: ['./pregunta-item.component.scss'],
   standalone: true,
-  imports: [
-    CommonModule, IonicModule, FormsModule, ReactiveFormsModule
-]
+  imports: [CommonModule, IonicModule, FormsModule, ReactiveFormsModule]
 })
-export class PreguntaItemComponent implements OnChanges, OnDestroy, OnInit {
+export class PreguntaItemComponent implements OnInit, OnChanges, OnDestroy {
   @Input() pregunta!: Pregunta;
-  @Input() indice!: number; // 👈 Aquí declaras el input que falta
+  @Input() indice!: number;
 
   @Input() editandoEncuesta: boolean = true;
-  @Input() editandoTexto: boolean = false;
+  @Input() editandoNombre: boolean = false;
   @Input() editandoTipo: boolean = false;
 
-  @Output() agregarDebajo = new EventEmitter<void>();
+  @Output() agregarDebajo = new EventEmitter<number>();
   @Output() eliminar = new EventEmitter<Pregunta>();
   @Output() activarEdicion = new EventEmitter<string>();
   @Output() salirEdicion = new EventEmitter<void>();
-  @Output() respuestaSeleccionada = new EventEmitter<{ idPregunta: string, valor: any }>();
+  @Output() respuestaSeleccionada = new EventEmitter<{ idPregunta: string; valor: any }>();
+  valoresMinimos = [0, 1];
+  valoresMaximos = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   escala: number[] = [];
-  private clickListener!: any;
+  tiposPregunta = ['texto', 'seleccion_unica', 'seleccion_multiple', 'escala', 'desplegable', 'calificacion'];
+  //obligatorio = false;
   private etiquetaTimeout: any;
-
-  tiposPregunta = ['texto', 'opcion_multiple', 'checkbox', 'escala'];
-opcion: any;
 
   constructor(
     private preguntaService: PreguntaService,
     private http: HttpClient,
     private el: ElementRef
-  ) {}
+  ) {
+    addIcons({trash, trashOutline, add, options, addCircle, addCircleOutline})
+  }
 
   ngOnInit() {
-    // Si la pregunta no existe (undefined), crea un objeto vacío del tipo Pregunta
-    this.pregunta = this.pregunta || {} as Pregunta;
-    // Si no hay opciones, inicializa un array vacío para evitar errores con .push() o .splice()
-    this.pregunta.opciones = this.pregunta.opciones || [];
-    // Inicializa las respuestas marcadas (para checkbox)
-    this.pregunta.respuestasMarcadas = this.pregunta.respuestasMarcadas || {};
-    // Si la selección es null o undefined, la deja en undefined
-    this.pregunta.seleccion = this.pregunta.seleccion ?? undefined;
+    this.initPregunta();
+    this.generarEscala();
   }
-  
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes['pregunta'] && this.pregunta) {
-      // normaliza por si viene como string u undefined
       this.pregunta.valorMin = Number(this.pregunta.valorMin) || 1;
       this.pregunta.valorMax = Number(this.pregunta.valorMax) || 5;
-      // genera la escala para visualizar
       this.generarEscala();
-
-      // debug temporal
-      console.log('[PreguntaItem] carga pregunta:', {
-        id: this.pregunta.id,
-        valorMin: this.pregunta.valorMin,
-        valorMax: this.pregunta.valorMax,
-        etiquetaInicio: this.pregunta.etiquetaInicio,
-        etiquetaFin: this.pregunta.etiquetaFin,
-        escala: this.escala
-      });
     }
   }
 
   ngOnDestroy() {
-    // Limpiar listener al destruir el componente
-    document.removeEventListener('click', this.clickListener);
+    clearTimeout(this.etiquetaTimeout);
+  }
+
+  private initPregunta() {
+    this.pregunta = this.pregunta || {} as Pregunta;
+    this.pregunta.opciones = this.pregunta.opciones || [];
+    this.pregunta.respuestasMarcadas = this.pregunta.respuestasMarcadas || {};
+    this.pregunta.seleccion = this.pregunta.seleccion ?? undefined;
   }
 
   @HostListener('document:click', ['$event'])
   onClickDocument(event: Event) {
-    if (!this.el.nativeElement.contains(event.target) && (this.editandoTexto || this.editandoTipo)) {
-      this.editandoTexto = false;
-      this.editandoTipo = false;
+    const target = event.target as HTMLElement;
+    if (!this.el.nativeElement.contains(target)) {
+      if (this.editandoTipo) this.editandoTipo = false;
+      if (this.editandoNombre) {
+        // llama explícitamente a guardarNombre
+        this.guardarNombre();
+      }
       this.salirEdicion.emit();
     }
   }
 
-  /* ======== ESCALA ======== */
-  // Rangos para edición
-  get rangoMin(): number[] {
-    //return Array.from({ length: 11 }, (_, i) => i); // 0 a 10
-    return Array.from({ length: 2 }, (_, i) => i); // 0 a 10
-  }
-
-  get rangoMax(): number[] {
-    //return Array.from({ length: 11 }, (_, i) => i); // 0 a 10
-    return Array.from({ length: 9 }, (_, i) => i + 2); // 0 a 10
-  }
-
+  /** ====== ESCALA ====== */
   generarEscala() {
     if (this.pregunta.valorMin !== undefined && this.pregunta.valorMax !== undefined) {
-      this.escala = Array.from(
-        { length: this.pregunta.valorMax - this.pregunta.valorMin + 1 },
-        (_, i) => i + this.pregunta.valorMin!
-      );
+      this.escala = Array.from({ length: this.pregunta.valorMax - this.pregunta.valorMin + 1 }, (_, i) => i + this.pregunta.valorMin!);
     } else {
       this.escala = [];
     }
@@ -115,62 +101,55 @@ opcion: any;
     this.actualizarCampo({ valorMin: this.pregunta.valorMin, valorMax: this.pregunta.valorMax });
   }
 
-  /* ======== EDICIÓN ======== */
-  /** Toggle edición de texto */
-  toggleTexto(event?: Event) {
-    if (event) event.stopPropagation(); // evita que el listener cierre
-    this.editandoTexto = true;
+    /** ====== OBLIGATORIEDAD ====== */
+  toggleObligatorio() {
+    this.pregunta.obligatorio = !this.pregunta.obligatorio;
+    this.actualizarCampo({ obligatorio: this.pregunta.obligatorio });
+  }
+
+  /** ====== EDICIÓN ====== */
+  toggleNombre(event?: Event) {
+    event?.stopPropagation();
+    this.editandoNombre = true;
     this.editandoTipo = false;
     this.activarEdicion.emit(this.pregunta.id);
   }
 
-  /** Toggle edición de tipo */
   toggleTipo(event?: Event) {
-    //if (!this.editandoEncuesta) return;
-    if (event) event.stopPropagation();
+    event?.stopPropagation();
     this.editandoTipo = true;
-    this.editandoTexto = false;
+    this.editandoNombre = false;
   }
 
-  /** Guardar texto editado */
-  guardarTexto() {
-    this.editandoTexto = false;
-    this.actualizarCampo({ texto: this.pregunta.texto });
+  guardarNombre() {
+    if (event) event.stopPropagation();
+    if (!this.pregunta.nombre) return;
+    this.editandoNombre = false;
+    this.actualizarCampo({ nombre: this.pregunta.nombre });
   }
 
-  /** Guardar tipo editado */
   guardarTipo() {
     this.editandoTipo = false;
     const nuevoTipo = this.pregunta.tipo;
 
-    if (nuevoTipo === 'opcion_multiple' || nuevoTipo === 'checkbox') {
-      this.pregunta.valorMin = undefined;
-      this.pregunta.valorMax = undefined;
-      this.pregunta.etiquetaInicio = '';
-      this.pregunta.etiquetaFin = '';
-
+    // Limpiamos campos según tipo
+    if (nuevoTipo === 'seleccion_unica' || nuevoTipo === 'seleccion_multiple') {
       if (!this.pregunta.opciones || this.pregunta.opciones.length === 0) {
         this.pregunta.opciones = [{ valor: 'Opción 1' }];
       }
     } else if (nuevoTipo === 'escala') {
       this.pregunta.opciones = [];
-
       this.pregunta.valorMin = 1;
       this.pregunta.valorMax = 5;
       this.pregunta.etiquetaInicio = 'Bajo';
       this.pregunta.etiquetaFin = 'Alto';
       this.generarEscala();
     } else {
-      // Si es texto u otro tipo, limpia todo lo que no aplique
       this.pregunta.opciones = [];
-      this.pregunta.valorMin = undefined;
-      this.pregunta.valorMax = undefined;
-      this.pregunta.etiquetaInicio = '';
-      this.pregunta.etiquetaFin = '';
     }
 
     this.actualizarCampo({
-      tipo: nuevoTipo, //this.pregunta.tipo
+      tipo: nuevoTipo,
       opciones: this.pregunta.opciones,
       valorMin: this.pregunta.valorMin,
       valorMax: this.pregunta.valorMax,
@@ -179,156 +158,87 @@ opcion: any;
     });
   }
 
-  eliminarPregunta() {
-    this.eliminar.emit(this.pregunta);
-  }
+  eliminarPregunta() { this.eliminar.emit(this.pregunta); }
 
-  onSeleccionarRespuesta(opcion: any) {
-    if (!this.editandoEncuesta) return;
-
-    this.pregunta.seleccion = opcion;
-
-    if (opcion.esOtro) {
-      opcion.valorUsuario = opcion.valorUsuario || '';
-    } else {
-      this.respuestaSeleccionada.emit({
-        idPregunta: this.pregunta.id!,
-        valor: opcion.valor
-      });
-    }
-
-    this.actualizarCampo({ seleccion: this.pregunta.seleccion });
-  }
-
-  onEtiquetaChange() {
-    clearTimeout(this.etiquetaTimeout);
-    this.etiquetaTimeout = setTimeout(() => this.actualizarCampo({
-      etiquetaInicio: this.pregunta.etiquetaInicio,
-      etiquetaFin: this.pregunta.etiquetaFin
-    }), 500);
-  }
-
-  /* ======== HTTP GENÉRICO ======== */
-  actualizarCampo(campos: Record<string, any>) {
-    if (!this.pregunta?.id || !this.pregunta?.idEncuesta) return;
-
-    this.preguntaService
-      .update(this.pregunta.idEncuesta, this.pregunta.id, campos)
-      .subscribe({
-        next: () => console.log('✅ Campo(s) actualizado(s)', campos),
-        error: (err) => console.error('❌ Error actualizando campos', err),
-      });
-  }
-
-  onToggleCheckbox(valor: string, checked: boolean) {
-    if (!this.pregunta.respuestasMarcadas) {
-      this.pregunta.respuestasMarcadas = {};
-    }
-    this.pregunta.respuestasMarcadas[valor] = checked;
-  }
-
+  /** ====== OPCIONES ====== */
   agregarOpcion(esOtro: boolean = false) {
-    this.pregunta.opciones = this.pregunta.opciones || [];
-    
-    // Evita agregar "Otro" si ya existe
-    if (esOtro && this.tieneOtro()) return;
+    const opciones = this.pregunta.opciones || [];
+    if (esOtro && opciones.some(o => o.esOtro)) return;
+    const nueva: Opcion = { valor: esOtro ? 'Otro' : `Opción ${opciones.length + 1}`, esOtro };
+    const idxOtro = opciones.findIndex(o => o.esOtro);
+    if (!esOtro && idxOtro !== -1) opciones.splice(idxOtro, 0, nueva);
+    else opciones.push(nueva);
 
-    const num = this.pregunta.opciones.length + 1;
-    const nueva: { valor: string; esOtro?: boolean } = { valor: esOtro ? 'Otro' : `Opción ${num}`, esOtro };
-    
-    this.pregunta.opciones.push(nueva);
-    
-    setTimeout(() => {
-      const activo = document.activeElement as HTMLElement;
-      const entradas = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
-      const ultimo = entradas[entradas.length - 1];
-      // ✅ Evita duplicar foco
-      if (activo !== ultimo) {
-        ultimo?.focus();
-      }
-    }, 50);
-
-    this.guardarOpciones();
-  }
-
-  focusUltimaOpcion() {
-    const inputs = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
-    inputs[inputs.length - 1].focus();
-  }
-
-  guardarOpciones() {
-    if (!this.pregunta.opciones) return;
-
-    // Filtrar opciones vacías
-    this.pregunta.opciones = this.pregunta.opciones
-        .filter(opcion => (opcion.esOtro ? opcion.valorUsuario?.trim(): opcion.valor?.trim()) !== "");
-
-    // Enviar directamente el arreglo limpio
+    this.pregunta.opciones = opciones;
     this.actualizarCampo({ opciones: this.pregunta.opciones });
   }
 
   eliminarOpcion(index: number) {
-    this.pregunta.opciones = this.pregunta.opciones || [];
-
+    if (!this.pregunta.opciones) return;
     this.pregunta.opciones.splice(index, 1);
-    this.guardarOpciones();
+    this.actualizarCampo({ opciones: this.pregunta.opciones });
+  }
+
+  setValorOpcion(opcion: Opcion, valor: string) {
+    opcion.valor = valor;
+    this.actualizarCampo({ opciones: this.pregunta.opciones });
   }
 
   focusSiguienteOpcion(index: number, event: Event) {
-    const keyboardEvent = event as KeyboardEvent; // forzar a KeyboardEvent
-    keyboardEvent.preventDefault();
-
-    this.pregunta.opciones = this.pregunta.opciones || [];
-
+    event.preventDefault();
     const siguiente = index + 1;
-    const inputs = Array.from(document.querySelectorAll('ion-input input')) as HTMLInputElement[];
-    
-    if (siguiente < this.pregunta.opciones.length) {
-      const siguienteInput = inputs[siguiente];
-      if (siguienteInput && document.activeElement !== siguienteInput) {
-        siguienteInput.focus();
-      }
+    const inputs = Array.from(this.el.nativeElement.querySelectorAll('ion-input input')) as HTMLInputElement[];
+    if (siguiente < inputs.length) {
+      inputs[siguiente]?.focus();
     } else {
       this.agregarOpcion();
-      setTimeout(() => {
-        const actualizados = Array.from(this.el.nativeElement.querySelectorAll('ion-input input')) as HTMLInputElement[];
-        const nuevo = actualizados[siguiente];
-        if (nuevo && document.activeElement !== nuevo) {
-          nuevo.focus();
-        }
-      }, 50);
     }
   }
 
-  getValorOpcion(opcion: any): string {
-    return opcion.esOtro ? (opcion.valorUsuario || '') : opcion.valor;
-  }
-
-  setValorOpcion(opcion: any, valor: string) {
-    if (opcion.esOtro) {
-      opcion.valorUsuario = valor;
-    } else {
-      opcion.valor = valor;
-    }
-    this.guardarOpciones();
-  }
-
-  tieneOtro(): boolean {
-    return this.pregunta.opciones?.some(opcion => opcion.esOtro) || false;
-  }
-
-  onCambioValorOtro(opcion: any) {
+  /** ====== RESPUESTAS ====== */
+  onSeleccionarRespuesta(opcion: Opcion) {
     if (!this.editandoEncuesta) return;
+    this.pregunta.seleccion = opcion.valor;
 
-    // Guardar y emitir cuando el usuario escribe en "Otro"
-    this.respuestaSeleccionada.emit({
-      idPregunta: this.pregunta.id!,
-      valor: opcion.valorUsuario || opcion.valor
-    });
+    if (!opcion.esOtro) {
+      this.respuestaSeleccionada.emit({ idPregunta: this.pregunta.id!, valor: opcion.valor });
+      this.pregunta.opciones?.forEach(o => { if (o.esOtro) o.valorUsuario = ''; });
+    }
 
-    this.actualizarCampo({
-      seleccion: this.pregunta.seleccion,
-      opciones: this.pregunta.opciones
+    this.actualizarCampo({ seleccion: this.pregunta.seleccion, opciones: this.pregunta.opciones });
+  }
+
+  onToggleCheckbox(valor: string, checked: boolean) {
+    this.pregunta.respuestasMarcadas = this.pregunta.respuestasMarcadas || {};
+    this.pregunta.respuestasMarcadas[valor] = checked;
+    this.pregunta.opciones?.forEach(o => {
+      if (o.valor === valor && o.esOtro && !checked) o.valorUsuario = '';
     });
+    this.actualizarCampo({ respuestasMarcadas: this.pregunta.respuestasMarcadas, opciones: this.pregunta.opciones });
+  }
+
+  onCambioValorOtro(opcion: Opcion) {
+    this.respuestaSeleccionada.emit({ idPregunta: this.pregunta.id!, valor: opcion.valorUsuario || opcion.valor });
+    this.actualizarCampo({ opciones: this.pregunta.opciones, seleccion: this.pregunta.seleccion });
+  }
+
+  tieneOtro(): boolean { return this.pregunta.opciones?.some(o => o.esOtro) || false; }
+
+  /** ====== HTTP ====== */
+  actualizarCampo(campos: Record<string, any>) {
+    if (!this.pregunta?.id || !this.pregunta?.idEncuesta) return;
+
+    this.preguntaService.update(this.pregunta.idEncuesta, this.pregunta.id, campos)
+      .subscribe({
+        next: () => console.log('✅ Campo(s) actualizado(s)', campos),
+        error: err => console.error('❌ Error actualizando campos', err)
+      });
+  }
+
+  onEtiquetaChange() {
+    clearTimeout(this.etiquetaTimeout);
+    this.etiquetaTimeout = setTimeout(() => {
+      this.actualizarCampo({ etiquetaInicio: this.pregunta.etiquetaInicio, etiquetaFin: this.pregunta.etiquetaFin });
+    }, 500);
   }
 }

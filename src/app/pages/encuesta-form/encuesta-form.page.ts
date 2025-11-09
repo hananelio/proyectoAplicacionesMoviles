@@ -121,7 +121,7 @@ export class EncuestaFormPage implements OnInit {
 
     const primera: Pregunta = {
       idEncuesta: this.id,
-      texto: 'Nueva pregunta',
+      nombre: 'Nueva pregunta',
       tipo: 'texto',
       opciones: [],
       obligatorio: false,
@@ -139,7 +139,7 @@ export class EncuestaFormPage implements OnInit {
     
     const nueva: Pregunta = {
       idEncuesta: this.id,
-      texto: 'Nueva pregunta',
+      nombre: 'Nueva pregunta',
       tipo: 'texto',
       opciones: [],
       obligatorio: false,

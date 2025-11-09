@@ -37,6 +37,8 @@
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@ionic/angular": "^8.7.5",
     "@ionic/pwa-elements": "^3.3.0",
+    "bootstrap": "^5.3.8",
+    "bootstrap-icons": "^1.13.1",
     "firebase": "^11.10.0",
     "ionicons": "^7.4.0",
     "luxon": "^3.7.2",

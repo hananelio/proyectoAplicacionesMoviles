@@ -96,6 +96,10 @@ export class EncuestaListPage implements OnInit, OnDestroy {
   }
 
   volver() {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) active.blur();
+
     this.location.back();
   }
 }
+

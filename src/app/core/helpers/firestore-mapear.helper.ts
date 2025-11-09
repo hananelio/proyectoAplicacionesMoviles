@@ -120,7 +120,7 @@ export class FirestoreMapear {
     static preguntaToFirestore(p: Pregunta) {
         const fields: any = {
             idEncuesta: { stringValue: p.idEncuesta },
-            texto: { stringValue: p.texto },
+            nombre: { stringValue: p.nombre },
             seccion: { stringValue: p.seccion ?? '' },
             tipo: { stringValue: p.tipo },
             orden: { integerValue: p.orden },
@@ -172,7 +172,7 @@ export class FirestoreMapear {
         return {
             id: doc.name?.split('/').pop(),
             idEncuesta: f.idEncuesta.stringValue,
-            texto: f.texto?.stringValue,
+            nombre: f.nombre?.stringValue,
             seccion: f.seccion?.stringValue,
             tipo: f.tipo?.stringValue,
             obligatorio: f.obligatorio?.booleanValue,
