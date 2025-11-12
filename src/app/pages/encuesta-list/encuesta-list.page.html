@@ -1,4 +1,4 @@
-<app-header></app-header>
+<app-header pageTitle="Lista de Encuestas"></app-header>
 
 <ion-content class="ion-padding">
   <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
@@ -25,15 +25,6 @@
     No hay encuestas registradas.
   </ion-text>
 
-<ion-fab vertical="bottom" horizontal="end" slot="fixed">
-  <ion-fab-button color="primary" [routerLink]="['/encuesta/nueva']">
-    <i class="fa-solid fa-plus fa-2x" style="color: white;"></i>
-  </ion-fab-button>
-</ion-fab>
+<app-fab-nuevo-elemento [visible]="true" [ruta]="'/encuesta/nueva'"></app-fab-nuevo-elemento>
 
-<ion-fab vertical="bottom" horizontal="start" slot="fixed">
-  <ion-fab-button color="primary" [routerLink]="['/inicio']">
-    <i class="fa-solid fa-hand-point-left fa-2x" style="color: white;"></i>
-  </ion-fab-button>
-</ion-fab>
 </ion-content>

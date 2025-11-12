@@ -1,19 +1,18 @@
 <ion-header>
   <ion-toolbar color="primary" class="custom-toolbar">
+
     <ion-buttons slot="start">
-      <ion-menu-button color="light"></ion-menu-button>
+      <ion-back-button *ngIf="showBackButton" [defaultHref]="backHref"></ion-back-button>
+      <ion-menu-button *ngIf="!showBackButton" color="light"></ion-menu-button>
     </ion-buttons>
 
     <div class="header-center">
-      <img *ngIf="images['logo']" class="logo" alt="logo" [src]="images['logo']">
       <ion-title>{{ pageTitle }}</ion-title>
     </div>
 
     <ion-buttons slot="end">
-      <span class="user-name">{{ userEmail }}</span>
       <ion-button fill="clear" color="light" (click)="onSignOut()">
-        <!--<i class="fa-solid fa-right-from-bracket"></i>-->
-        <ion-icon slot="start" class="fa-solid fa-right-from-bracket"></ion-icon>
+        <ion-icon name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>

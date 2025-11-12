@@ -78,10 +78,9 @@ export class FirestoreMapear {
         }
         
         if (u.complemento) fields.complemento = { stringValue: u.complemento };
-        //if (u.password) fields.password = { stringValue: u.password };
+        if (u.password) fields.password = { stringValue: u.password };
         if (u.fechaNacimiento)
-            fields.fechaNacimiento = { timestampValue: this.toTimestamp(u.fechaNacimiento) };
-        if (u.fechaCreacion) fields.fechaCreacion = { timestampValue: this.toTimestamp(u.fechaCreacion) };
+            fields.fechaNacimiento = { timestampValue: this.toTimestamp(u.fechaNacimiento) };        // if (u.fechaCreacion) fields.fechaCreacion = { timestampValue: new Date(u.fechaCreacion).toISOString() };
         /*if (u.fechaNacimiento)
             fields.fechaNacimiento = { timestampValue: new Date(u.fechaNacimiento).toISOString() };*/
         //if (u.fechaNacimiento) fields.fechaNacimiento = { timestampValue: u.fechaNacimiento };

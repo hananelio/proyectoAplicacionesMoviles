@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, tap, map, from, catchError, switchMap, throwError  } from 'rxjs';
+import { Observable, tap, map, from, catchError, switchMap, throwError, BehaviorSubject  } from 'rxjs';
 import { AuthResponse } from 'src/app/models/auth-response.model';
 import { RefreshResponse } from 'src/app/models/refresh-response.model';
 import { environment } from 'src/environments/environment';
@@ -15,6 +15,9 @@ export class AuthRestService {
   private refreshToken? : string;
   private userEmail? : string;
   private tokenExpirationTime?: number;
+
+  private userEmailSubject = new BehaviorSubject<string | undefined>(this.userEmail);
+  userEmail$ = this.userEmailSubject.asObservable();
 
   constructor(private http: HttpClient, private injector: Injector) {
     this.loadSession();
@@ -65,6 +68,8 @@ export class AuthRestService {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userEmail');
     localStorage.removeItem('tokenExpirationTime');
+    
+    this.userEmailSubject.next(undefined);// Notificar cierre
   }
 
   signInEmailPassword(email : string, password : string) : Observable<string> {
@@ -112,6 +117,8 @@ export class AuthRestService {
     localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('userEmail', email);
     localStorage.setItem('tokenExpirationTime', this.tokenExpirationTime.toString());
+  
+    this.userEmailSubject.next(email);// Notificar cambio
   }
 
   /** Refrescar token si expiró */

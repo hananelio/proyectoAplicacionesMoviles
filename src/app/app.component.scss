@@ -1,0 +1,52 @@
+/* === MENÚ LATERAL === */
+.menu-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--ion-color-primary);
+    color: white;
+}
+
+.menu-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+.menu-user h2 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.menu-user p {
+    font-size: 0.8rem;
+    opacity: 0.85;
+    margin: 0;
+}
+
+/* === ÍTEMS === */
+.menu-list ion-item {
+    --background: transparent;
+    --color: var(--ion-color-dark);
+    border-radius: 12px;
+    margin: 6px 12px;
+    transition: background 0.2s ease-in-out;
+}
+
+.menu-list ion-item:hover {
+    background: rgba(var(--ion-color-primary-rgb), 0.1);
+}
+
+.menu-list ion-icon {
+    font-size: 20px;
+    color: var(--ion-color-primary);
+}
+
+/* === PIE DE MENÚ === */
+.menu-footer {
+    margin-top: 1.5rem;
+    padding: 0 16px;
+}

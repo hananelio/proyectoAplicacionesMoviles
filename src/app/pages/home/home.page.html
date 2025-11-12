@@ -11,7 +11,7 @@
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
               <ion-item>
                 <!--<ion-icon slot="start" name="mail-open-outline"></ion-icon>-->
-                <ion-icon slot="start" class="fa-solid fa-envelope"></ion-icon>
+                <ion-icon name="mail-outline"></ion-icon>
                 <ion-input formControlName="usernameOrEmail" type="text" autocomplete="username" placeholder="Correo o Username"></ion-input>
               </ion-item>
               
@@ -21,7 +21,7 @@
 
               <ion-item>
                 <!--<ion-icon slot="start" name="lock-closed-outline"></ion-icon>-->
-                <ion-icon slot="start" class="fa-solid fa-lock"></ion-icon>
+                <ion-icon name="lock-closed-outline"></ion-icon>
                 <ion-input formControlName="password" type="password" autocomplete="current-password" placeholder="Contraseña"></ion-input>
               </ion-item>
               <div class="error" *ngIf="loginForm.get('password')?.invalid && (loginForm.get('password')?.touched || loginForm.get('password')?.dirty)">

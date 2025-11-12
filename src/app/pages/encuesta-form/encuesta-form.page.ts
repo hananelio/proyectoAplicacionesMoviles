@@ -11,6 +11,8 @@ import { Pregunta } from 'src/app/models/pregunta.model';
 import { PreguntaService } from 'src/app/services/collections/pregunta.service';
 import { Respuesta } from 'src/app/models/respuesta.model';
 import { RespuestaService } from 'src/app/services/collections/respuesta.service';
+import { HeaderComponent } from "../header/header.component";
+
 @Component({
   selector: 'app-encuesta-form',
   templateUrl: './encuesta-form.page.html',
@@ -18,8 +20,9 @@ import { RespuestaService } from 'src/app/services/collections/respuesta.service
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonicModule,
-    ReactiveFormsModule, PreguntaListComponent
-  ]
+    ReactiveFormsModule, PreguntaListComponent,
+    HeaderComponent
+]
 })
 export class EncuestaFormPage implements OnInit {
   encuesta: Encuesta = { //Inicializa la encuesta vacía por defecto
@@ -109,28 +112,44 @@ export class EncuestaFormPage implements OnInit {
         .subscribe(enc => {
           this.encuesta = enc;
           this.id = enc.id;
-          this.crearPreguntaInicial();
-          this.volver()
+          
+          this.crearPreguntaInicial().then(() => {
+            this.editMode = true;
+
+            this.preguntaService.getAll(this.id)
+              .subscribe(pregs => this.preguntas = pregs);
+          });
+          
+          /*setTimeout(() => {
+            this.preguntaService.getAll(this.id)
+              .subscribe(pregs => this.preguntas = pregs);
+          }, 500);*/
         });
     }
   }
 
   /** Crea la primera pregunta por defecto */
-  private crearPreguntaInicial() {
-    if (!this.id) return;
+  private crearPreguntaInicial(): Promise<void> {
+    //if (!this.id) return;
 
-    const primera: Pregunta = {
-      idEncuesta: this.id,
-      nombre: 'Nueva pregunta',
-      tipo: 'texto',
-      opciones: [],
-      obligatorio: false,
-      orden: 1
-    };
+    return new Promise(resolve => {
+      const primera: Pregunta = {
+        idEncuesta: this.id,
+        nombre: 'Nueva pregunta',
+        tipo: 'texto',
+        opciones: [],
+        obligatorio: false,
+        orden: 1
+      };
+      this.preguntaService.create(primera).subscribe(p => {
+        this.preguntas = [p];
+        resolve();
+      });
+    })
 
-    this.preguntaService.create(primera).subscribe(p => {
-      this.preguntas = [p];
-    });
+
+
+
   }
 
   /**Permite agregar preguntas al final */

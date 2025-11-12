@@ -1,34 +1,45 @@
-<div class="preguntas-container" *ngIf="preguntas && preguntas.length > 0; else noPreguntas">
-  <div *ngFor="let pregunta of preguntas; let i = index">
+<div
+  class="preguntas-container"
+  *ngIf="preguntas && preguntas.length > 0; else noPreguntas"
+>
+<!--
+  cdkDropList
+  [cdkDropListData]="preguntas"
+  (cdkDropListDropped)="drop($event)"
+  [cdkDropListLockAxis]="'y'"
+  [cdkDropListSortingDisabled]="false"
+  [cdkDropListEnterPredicate]="enterPredicate"
+-->
+  <div *ngFor="let pregunta of preguntas; let i = index"><!--cdkDrag-->
     <app-pregunta-item
       [pregunta]="pregunta"
-      [indice]="i + 1"
+      [indice]="i"
+      (subir)="subirPregunta($event)"
+      (bajar)="bajarPregunta($event)"
       (eliminar)="onEliminarPregunta(pregunta)"
-      (agregarDebajo)="onAgregarPreguntaDebajo($event)"
+      (agregarDebajo)="onAgregarPreguntaDebajo(i)"
     ></app-pregunta-item>
   </div>
 
-  <ion-button
-    expand="block"
-    fill="outline"
-    size="small"
-    color="primary"
-    (click)="onAgregarPregunta()"
-  >
-    <i slot="start" class="fa-solid fa-circle-plus"></i>
-    Agregar nueva pregunta
-  </ion-button>
+  <ion-card color="light" class="ion-text-center ion-padding">
+    <ion-button
+      fill="outline" size="small" color="primary"
+      (click)="onAgregarPregunta()"
+    >
+      <ion-icon name="add-circle"></ion-icon>
+      Agregar nueva pregunta
+    </ion-button>
+  </ion-card>
 </div>
 
 <ng-template #noPreguntas>
   <ion-card color="light" class="ion-text-center ion-padding">
     <p>No hay preguntas aún.</p>
     <ion-button
-      fill="outline"
-      size="small"
-      color="primary"
-      (click)="onAgregarPregunta()">
-      <i slot="start" class="fa-solid fa-circle-plus"></i>
+      fill="outline" size="small" color="primary"
+      (click)="onAgregarPregunta()"
+    >
+      <ion-icon name="add-circle"></ion-icon>
       Crear primera pregunta
     </ion-button>
   </ion-card>

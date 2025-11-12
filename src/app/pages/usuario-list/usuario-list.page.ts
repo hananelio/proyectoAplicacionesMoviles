@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 import { HeaderComponent } from '../header/header.component';
 import { Location } from '@angular/common';
 import { UsuarioStateService } from 'src/app/services/core/usuario-state.servuce';
+import { FabNuevoElementoComponent } from "../fab-nuevo-elemento/fab-nuevo-elemento.component";
 
 @Component({
   selector: 'app-usuario-list',
@@ -17,8 +18,9 @@ import { UsuarioStateService } from 'src/app/services/core/usuario-state.servuce
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonicModule,
-    RouterLink, HeaderComponent
-  ]
+    RouterLink, HeaderComponent,
+    FabNuevoElementoComponent
+]
 })
 export class UsuarioListPage implements OnInit, OnDestroy {
 

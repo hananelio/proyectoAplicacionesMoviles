@@ -63,10 +63,11 @@ export class HomePage { //FormLoginComponent
     this.authentication.getToken().subscribe({
       next: token => {
         console.log('Token válido encontrado:', token);
-        this.router.navigateByUrl('/inicio');
+        this.router.navigateByUrl('/inicio', { replaceUrl: true });
       },
       error: err => {
-        console.log('No hay sesión activa:', err);
+        // console.log('No hay sesión activa:', err);
+        console.log(' No hay sesión activa, permanece en Home');
       }
     });
     /*const token = this.authentication.getToken();

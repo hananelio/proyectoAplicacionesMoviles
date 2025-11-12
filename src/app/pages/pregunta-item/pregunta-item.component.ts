@@ -1,12 +1,10 @@
-import { Component, EventEmitter, Input, Output, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges, HostListener } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ElementRef, OnInit, OnDestroy, OnChanges, SimpleChanges, HostListener, output } from '@angular/core';
 import { Pregunta } from 'src/app/models/pregunta.model';
 import { PreguntaService } from 'src/app/services/collections/pregunta.service';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { addIcons } from 'ionicons';
-import { add, addCircle, addCircleOutline, options, trash, trashOutline } from 'ionicons/icons';
 
 export interface Opcion {
   valor: string;
@@ -34,6 +32,9 @@ export class PreguntaItemComponent implements OnInit, OnChanges, OnDestroy {
   @Output() activarEdicion = new EventEmitter<string>();
   @Output() salirEdicion = new EventEmitter<void>();
   @Output() respuestaSeleccionada = new EventEmitter<{ idPregunta: string; valor: any }>();
+  @Output() subir = new EventEmitter<number>();
+  @Output() bajar = new EventEmitter<number>();
+
   valoresMinimos = [0, 1];
   valoresMaximos = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -46,9 +47,7 @@ export class PreguntaItemComponent implements OnInit, OnChanges, OnDestroy {
     private preguntaService: PreguntaService,
     private http: HttpClient,
     private el: ElementRef
-  ) {
-    addIcons({trash, trashOutline, add, options, addCircle, addCircleOutline})
-  }
+  ) { }
 
   ngOnInit() {
     this.initPregunta();

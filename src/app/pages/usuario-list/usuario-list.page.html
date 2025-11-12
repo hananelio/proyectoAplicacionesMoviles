@@ -28,10 +28,18 @@
       </ion-label>
 
       <ion-buttons slot="end">
-        <ion-button color="primary" [routerLink] = "['/usuario/detalle', usuario.id]">Ver</ion-button>
-        <ion-button color="warning" [routerLink] = "['/usuario/editar', usuario.id]">Editar</ion-button>
-        <ion-button color="danger" *ngIf="usuario.estado == 'activo'" (click)="eliminarLogicaUsuario(usuario)">Eliminar</ion-button>
-        <ion-button color="success" *ngIf="usuario.estado == 'inactivo'" (click)="activarUsuario(usuario)">Activar</ion-button>
+        <ion-button fill="clear" shape="round" aria-label="Ver el usuario" color="primary" [routerLink] = "['/usuario/detalle', usuario.id]">
+          <ion-icon slot="icon-only" name="eye-outline"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" shape="round" aria-label="Editar el usuario" color="warning" [routerLink] = "['/usuario/editar', usuario.id]">
+          <ion-icon slot="icon-only" name="pencil-outline"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" shape="round" aria-label="Eliminar el usuario" color="danger" *ngIf="usuario.estado == 'activo'" (click)="eliminarLogicaUsuario(usuario)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" shape="round" aria-label="Activar el usuario" color="success" *ngIf="usuario.estado == 'inactivo'" (click)="activarUsuario(usuario)">
+          <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
+        </ion-button>
       </ion-buttons>
     </ion-item>
   </ion-list>
@@ -40,15 +48,5 @@
     No hay usuarios que coincidan con la búsqueda.
   </ion-text>
 
-<ion-fab vertical="bottom" horizontal="end" slot="fixed">
-  <ion-fab-button color="primary" [routerLink]="['/usuario/nueva']">
-    <i class="fa-solid fa-plus fa-2x" style="color: white;"></i>
-  </ion-fab-button>
-</ion-fab>
-
-<ion-fab vertical="bottom" horizontal="start" slot="fixed">
-  <ion-fab-button color="primary" [routerLink]="['/inicio']">
-    <i class="fa-solid fa-hand-point-left fa-2x" style="color: white;"></i>
-  </ion-fab-button>
-</ion-fab>
+  <app-fab-nuevo-elemento [visible]="true" [ruta]="'/usuario/nueva'"></app-fab-nuevo-elemento>
 </ion-content>

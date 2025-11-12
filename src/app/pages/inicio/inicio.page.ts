@@ -3,6 +3,8 @@ import { Router, RouterLink } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../header/header.component';
+import { addIcons } from 'ionicons';
+import { addOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-inicio',
@@ -14,7 +16,7 @@ import { HeaderComponent } from '../header/header.component';
   ] 
 })
 export class InicioPage {
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
   goToCrearEncuesta() {
     this.router.navigateByUrl('/crear-encuesta');

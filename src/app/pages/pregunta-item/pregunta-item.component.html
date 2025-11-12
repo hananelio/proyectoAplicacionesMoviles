@@ -1,4 +1,30 @@
 <ion-card class="pregunta-card">
+  <ion-row class="ion-justify-content-start">
+    
+    <ion-col size="auto">
+      <ion-button
+        shape="round" fill="clear"
+        color="primary" aria-label="Subir pregunta"
+        (click)="subir.emit(indice)"
+      >
+        <ion-icon
+          size="large" slot="icon-only"
+          name="chevron-up-circle-outline"
+        ></ion-icon>
+      </ion-button>
+    </ion-col>
+    
+    <ion-col size="auto">
+      <ion-button
+        shape="round" fill="clear"
+        color="primary" aria-label="Bajar pregunta"
+        (click)="bajar.emit(indice)"
+      >
+        <ion-icon size="large" slot="icon-only" name="chevron-down-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-col>
+  </ion-row>
+
   <!-- TEXTO DE LA PREGUNTA -->
   <ion-card-header (click)="toggleNombre($event)">
     <div class="titulo-pregunta">
@@ -25,12 +51,16 @@
   </ion-card-header>
 
   <!-- TIPO DE PREGUNTA -->
-  <ion-item (click)="toggleTipo($event)" lines="none">
-    <ion-label [hidden]="editandoTipo">Tipo: {{ pregunta.tipo || 'texto' }}</ion-label>
-    <ion-select [hidden]="!editandoTipo" [(ngModel)]="pregunta.tipo" (ionChange)="guardarTipo()">
-      <ion-select-option *ngFor="let tipo of tiposPregunta" [value]="tipo">{{ tipo | titlecase }}</ion-select-option>
-    </ion-select>
-  </ion-item>
+  <ion-row>
+    <ion-col>
+    <ion-item (click)="toggleTipo($event)" lines="none">
+      <ion-label [hidden]="editandoTipo">Tipo: {{ pregunta.tipo || 'texto' }}</ion-label>
+      <ion-select [hidden]="!editandoTipo" [(ngModel)]="pregunta.tipo" (ionChange)="guardarTipo()">
+        <ion-select-option *ngFor="let tipo of tiposPregunta" [value]="tipo">{{ tipo | titlecase }}</ion-select-option>
+      </ion-select>
+    </ion-item>
+    </ion-col>
+  </ion-row>
 
   <!-- OPCIONES -->
   <ng-container *ngIf="pregunta.tipo === 'seleccion_unica' || pregunta.tipo === 'seleccion_multiple'">
@@ -177,7 +207,8 @@
 
   <!-- ACCIONES -->
   <ion-row class="ion-justify-content-center">
-    <ion-col size="auto" class="ion-text-center">
+
+    <ion-col size="auto">
       <ion-button
         shape="round" fill="clear"
         color="danger" aria-label="Eliminar pregunta"
@@ -186,7 +217,8 @@
         <ion-icon slot="icon-only" size="large" name="trash"></ion-icon>
       </ion-button>
     </ion-col>
-    <ion-col size="auto" class="ion-text-center">
+
+    <ion-col size="auto">
       <ion-button
         shape="round" fill="clear"
         color="success" aria-label="Agregar nueva pregunta debajo"
@@ -195,6 +227,7 @@
         <ion-icon slot="icon-only" size="large" name="add-circle-outline"></ion-icon>
       </ion-button>
     </ion-col>
+
   </ion-row>
 
   <ion-row class="ion-align-items-center ion-justify-content-end">
@@ -212,5 +245,7 @@
         (ionChange)="actualizarCampo({ obligatorio: pregunta.obligatorio })"
       ></ion-toggle>
     </ion-col>
+
   </ion-row>
+  
 </ion-card>

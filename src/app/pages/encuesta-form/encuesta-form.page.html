@@ -1,4 +1,4 @@
-<ion-header>
+<!-- <ion-header>
   <ion-toolbar color="primary">
     <ion-title>{{ editMode ? 'Editar Encuesta' : 'Nueva Encuesta' }}</ion-title>
 
@@ -7,7 +7,12 @@
     </ion-buttons>
 
   </ion-toolbar>
-</ion-header>
+</ion-header> -->
+<app-header
+  [pageTitle]="editMode ? 'Editar Encuesta' : 'Nueva Encuesta'"
+  [showBackButton]="true"
+  backHref="/encuesta-list"
+></app-header>
 
 <ion-content fullscreen class="ion-padding">
   <!-- Formulario de encuesta -->

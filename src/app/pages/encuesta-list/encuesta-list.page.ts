@@ -9,6 +9,9 @@ import { EncuestaStateService } from 'src/app/services/core/encuesta-state.servi
 import { HeaderComponent } from '../header/header.component';
 import { Location } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { addIcons } from 'ionicons';
+import { addOutline } from 'ionicons/icons';
+import { FabNuevoElementoComponent } from "../fab-nuevo-elemento/fab-nuevo-elemento.component";
 
 @Component({
   selector: 'app-encuesta-list',
@@ -17,7 +20,8 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonicModule,
-    RouterLink, HeaderComponent
+    RouterLink, HeaderComponent,
+    FabNuevoElementoComponent
 ]
 })
 export class EncuestaListPage implements OnInit, OnDestroy {
@@ -35,7 +39,9 @@ export class EncuestaListPage implements OnInit, OnDestroy {
     private alertCtrl: AlertController,
     private encuestaState: EncuestaStateService,
     private location: Location
-  ) { }
+  ) {
+    addIcons({ addOutline });
+  }
 
   ngOnInit() {
     this.sub = this.encuestaState.encuestas$.subscribe(

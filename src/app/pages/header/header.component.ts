@@ -1,12 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule, NgIf } from '@angular/common';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { HttpClientModule } from '@angular/common/http';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
-import { Images } from '../../services/core/images';
 import { AuthRestService } from 'src/app/services/core/auth-rest.service';
-
 
 @Component({
   selector: 'app-header',
@@ -19,12 +17,14 @@ import { AuthRestService } from 'src/app/services/core/auth-rest.service';
   standalone: true,
 })
 export class HeaderComponent  implements OnInit {
-  pageTitle: string = '';
+  @Input() pageTitle: string = '';
+  @Input() showBackButton: boolean = false;
+  @Input() backHref: string = '/';
+  
   userEmail: string = '';
   images: Record<string, any> = {};
 
   constructor(
-    private imagesService: Images,
     private router: Router,
     private route: ActivatedRoute,
     private authService: AuthRestService,
@@ -32,9 +32,6 @@ export class HeaderComponent  implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.loadImages();
-
-    this.userEmail = this.authService.getUserEmail() || 'Invitado';
     
     this.router.events
     .pipe(
@@ -44,20 +41,6 @@ export class HeaderComponent  implements OnInit {
     .subscribe(snapshot => {
       this.pageTitle = snapshot?.data['title'] || 'Aplicación';
     });
-  }
-
-  async loadImages() {
-    try {
-      this.images = this.imagesService.getImages() || await this.imagesService.loadImages();
-      
-      Object.keys(this.images).forEach(key => {
-        console.log(`Imagen cargada: ${key}`);
-      });
-      
-    } catch (err) {
-      console.error('Error cargando images.json', err);
-      this.images = {};
-    }
   }
 
   // Función recursiva para obtener el snapshot de la ruta activa
